@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Update Contact</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 350px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: #007bff;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .error, .success {
+      margin-top: 10px;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN FORM -->
+  <div class="container" id="loginContainer">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Enter Email" required>
+    <input type="text" id="contact" placeholder="Enter Contact" required>
+    <button id="loginBtn">Login</button>
+    <p class="error" id="errorMsg"></p>
+  </div>
+
+  <!-- WELCOME & UPDATE CONTACT -->
+  <div class="container hidden" id="welcomeContainer">
+    <h2>Welcome!</h2>
+    <p id="userInfo"></p>
+
+    <h3>Update Contact</h3>
+    <input type="text" id="newContact" placeholder="Enter new contact">
+    <button id="updateBtn">Update Contact</button>
+    <p class="success" id="successMsg"></p>
+    <p class="error" id="updateError"></p>
+
+    <button id="logoutBtn" style="margin-top:15px;">Logout</button>
+  </div>
+
+  <script>
+    const loginContainer = document.getElementById('loginContainer');
+    const welcomeContainer = document.getElementById('welcomeContainer');
+    const errorMsg = document.getElementById('errorMsg');
+    const userInfo = document.getElementById('userInfo');
+    const successMsg = document.getElementById('successMsg');
+    const updateError = document.getElementById('updateError');
+
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const updateBtn = document.getElementById('updateBtn');
+
+    // Check if user is already logged in
+    let storedUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    if(storedUser){
+      showWelcome(storedUser);
+    }
+
+    // LOGIN
+    loginBtn.addEventListener('click', async () => {
+      const email = document.getElementById('email').value.trim();
+      const contact = document.getElementById('contact').value.trim();
+
+      if(!email || !contact){
+        errorMsg.textContent = "Please enter both email and contact!";
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/api/users');
+        if(!response.ok) throw new Error('Network error');
+        const users = await response.json();
+
+        const user = users.find(u => u.email === email && u.contact === contact);
+
+        if(user){
+          storedUser = user;
+          localStorage.setItem('loggedInUser', JSON.stringify(user));
+          showWelcome(user);
+        } else {
+          errorMsg.textContent = "Invalid email or contact!";
+        }
+
+      } catch (error) {
+        console.error(error);
+        errorMsg.textContent = "Server error. Try again later.";
+      }
+    });
+
+    // LOGOUT
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('loggedInUser');
+      welcomeContainer.classList.add('hidden');
+      loginContainer.classList.remove('hidden');
+      errorMsg.textContent = '';
+      successMsg.textContent = '';
+      updateError.textContent = '';
+      document.getElementById('email').value = '';
+      document.getElementById('contact').value = '';
+      document.getElementById('newContact').value = '';
+    });
+
+    // SHOW WELCOME
+    function showWelcome(user){
+      loginContainer.classList.add('hidden');
+      welcomeContainer.classList.remove('hidden');
+      userInfo.textContent = `Hello, ${user.name}! Your email is ${user.email} and contact is ${user.contact}.`;
+    }
+
+    // UPDATE CONTACT
+    updateBtn.addEventListener('click', async () => {
+      const newContact = document.getElementById('newContact').value.trim();
+      if(!newContact){
+        updateError.textContent = "Please enter new contact!";
+        successMsg.textContent = '';
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/users/${storedUser._id}`, {
+          method: 'PUT',  // Make sure your backend supports PUT
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contact: newContact })
+        });
+
+        if(!response.ok) throw new Error('Failed to update contact');
+        const updatedUser = await response.json();
+
+        storedUser.contact = updatedUser.contact;
+        localStorage.setItem('loggedInUser', JSON.stringify(storedUser));
+        userInfo.textContent = `Hello, ${storedUser.name}! Your email is ${storedUser.email} and contact is ${storedUser.contact}.`;
+        successMsg.textContent = "Contact updated successfully!";
+        updateError.textContent = '';
+        document.getElementById('newContact').value = '';
+
+      } catch (error) {
+        console.error(error);
+        updateError.textContent = "Failed to update contact.";
+        successMsg.textContent = '';
+      }
+    });
+  </script>
+</body>
+</html>
