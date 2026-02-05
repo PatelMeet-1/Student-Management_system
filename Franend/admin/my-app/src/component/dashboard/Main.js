@@ -10,7 +10,7 @@ import PracticalMarks from "../practicalmarkResult/Practical";
 import Finalresult from "../Final result/Finalresult";
 import CourseSemesterPage from "../CourseSemPage.js/CourseSemesterPage"; 
 import Totalmarks from "../SemesterWiseTotalMarks/SemesterWiseTotalMarks";
-import FinalCertificate from "../Finalcertificate/Finalcertificate";
+import FinalCertificate from "../Finalcertificate/";
 
 
 export default function Main() {
@@ -27,7 +27,7 @@ export default function Main() {
       {active === "practical" && <PracticalMarks />}
       {active === "final" && <Finalresult />}
       {active === "course" && <CourseSemesterPage />}
-      {active === "marks" && <Totalmarks />} {/* ✅ Use "marks" same as sidebar */}
+      {active === "marks" && <Totalmarks />}
       {active === "finalcertificate" && <FinalCertificate />}
     </Layout>
   );
