@@ -7,12 +7,11 @@ const facultySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
     contact: {
       type: String,
       required: true,
+      trim: true,
     },
-
     email: {
       type: String,
       required: true,
@@ -20,20 +19,21 @@ const facultySchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-
-    // 🔥 COURSE ID (VERY IMPORTANT)
     course: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
       required: true,
     },
-
-    
-
     password: {
       type: String,
-      required: true, // encrypted password
+      required: true,
+      minlength: 6,
+      select: false, // 🔥 IMPORTANT
     },
+
+    // ✅ OTP fields (MATCH CONTROLLER + DB)
+    otp: String,
+    otpExpiry: Date,
   },
   { timestamps: true }
 );

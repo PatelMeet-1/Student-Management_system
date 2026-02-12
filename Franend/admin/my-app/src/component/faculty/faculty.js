@@ -3,6 +3,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import UnifiedSearchFilter from "./filter1"; // Import separate component
 
 export default function Faculty() {
   // ================= STATES =================
@@ -11,7 +12,8 @@ export default function Faculty() {
   const [editIndex, setEditIndex] = useState(null);
   const [loading, setLoading] = useState(false);
   const [courseMap, setCourseMap] = useState({});
-  const [filters, setFilters] = useState({ name: "", course: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
   const [facultyForm, setFacultyForm] = useState({
     name: "",
@@ -116,6 +118,7 @@ export default function Faculty() {
     });
 
     setEditIndex(index);
+    setShowForm(true);
   };
 
   // ================= DELETE =================
@@ -142,169 +145,154 @@ export default function Faculty() {
       password: "",
     });
     setEditIndex(null);
+    setShowForm(false);
   };
 
-  // ================= FILTERED FACULTIES (NO DEPARTMENT) =================
+  // ================= UNIFIED FILTERED FACULTIES =================
   const filteredFaculties = faculties.filter(f =>
-    (f.name || "").toLowerCase().includes(filters.name.toLowerCase()) &&
-    (courseMap[f.course] || "").toLowerCase().includes(filters.course.toLowerCase())
+    searchTerm === "" ||
+    (f.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (f.contact || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (f.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (courseMap[f.course] || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (f.course?.courseName || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="container mt-4">
       <ToastContainer />
 
-      {/* FORM */}
+      {/* FORM BUTTON */}
       <h3 className="text-center mb-4">🎓 Faculty Manager</h3>
-      <div className="card shadow-lg mb-5">
-        
-        <div className="card-header bg-primary text-white p-4">
-          <h4 className="mb-0">
-            {editIndex !== null ? "✏️ Edit Faculty" : "➕ Add New Faculty"}
-          </h4>
-        </div>
-        <div className="card-body p-5">
-          <div className="row g-4">
-            <div className="col-md-6">
-              <label className="form-label fw-bold">👤 Faculty Name <span className="text-danger">*</span></label>
-              <input
-                className="form-control"
-                placeholder="Enter faculty name"
-                value={facultyForm.name}
-                onChange={(e) =>
-                  setFacultyForm({ ...facultyForm, name: e.target.value })
-                }
-              />
+      <div className="text-center mb-4 ">
+        <button 
+          className="btn btn-primary btn-lg py-3 px-5 fs-4 w-100" 
+          onClick={() => setShowForm(!showForm)}
+        >
+          ➕ Add New Faculty
+        </button>
+      </div>
+
+      {/* FORM - HIDE/SHOW */}
+      {showForm && (
+        <div className="card shadow-lg mb-5">
+          
+          <div className="card-body p-5">
+            <div className="row g-4">
+              <div className="col-md-6">
+                <label className="form-label fw-bold">👤 Faculty Name <span className="text-danger">*</span></label>
+                <input
+                  className="form-control"
+                  placeholder="Enter faculty name"
+                  value={facultyForm.name}
+                  onChange={(e) =>
+                    setFacultyForm({ ...facultyForm, name: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label fw-bold">📱 Contact <span className="text-danger">*</span></label>
+                <input
+                  className="form-control"
+                  placeholder="10 digit mobile number"
+                  value={facultyForm.contact}
+                  onChange={(e) =>
+                    setFacultyForm({ ...facultyForm, contact: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label fw-bold">✉️ Email <span className="text-danger">*</span></label>
+                <input
+                  className="form-control"
+                  type="email"
+                  placeholder="faculty@example.com"
+                  value={facultyForm.email}
+                  onChange={(e) =>
+                    setFacultyForm({ ...facultyForm, email: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label fw-bold">🎓 Course <span className="text-danger">*</span></label>
+                <select
+                  className="form-select"
+                  value={facultyForm.course}
+                  onChange={(e) => setFacultyForm({ ...facultyForm, course: e.target.value })}
+                >
+                  <option value="">Select Course</option>
+                  {courses.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.courseName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label fw-bold">🔐 Password</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder={
+                    editIndex !== null
+                      ? "Leave empty to keep existing"
+                      : "Enter password (min 6 chars)"
+                  }
+                  value={facultyForm.password}
+                  onChange={(e) =>
+                    setFacultyForm({ ...facultyForm, password: e.target.value })
+                  }
+                />
+              </div>
             </div>
 
-            <div className="col-md-6">
-              <label className="form-label fw-bold">📱 Contact <span className="text-danger">*</span></label>
-              <input
-                className="form-control"
-                placeholder="10 digit mobile number"
-                value={facultyForm.contact}
-                onChange={(e) =>
-                  setFacultyForm({ ...facultyForm, contact: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="col-md-6">
-              <label className="form-label fw-bold">✉️ Email <span className="text-danger">*</span></label>
-              <input
-                className="form-control"
-                type="email"
-                placeholder="faculty@example.com"
-                value={facultyForm.email}
-                onChange={(e) =>
-                  setFacultyForm({ ...facultyForm, email: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="col-md-6">
-              <label className="form-label fw-bold">🎓 Course <span className="text-danger">*</span></label>
-              <select
-                className="form-select"
-                value={facultyForm.course}
-                onChange={(e) => setFacultyForm({ ...facultyForm, course: e.target.value })}
-              >
-                <option value="">Select Course</option>
-                {courses.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.courseName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-md-6">
-              <label className="form-label fw-bold">🔐 Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder={
-                  editIndex !== null
-                    ? "Leave empty to keep existing"
-                    : "Enter password (min 6 chars)"
-                }
-                value={facultyForm.password}
-                onChange={(e) =>
-                  setFacultyForm({ ...facultyForm, password: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="d-flex gap-3 mt-4">
-            <button 
-              className="btn btn-primary w-100 py-3 fs-5" 
-              onClick={submitFaculty}
-              disabled={loading || !facultyForm.name || !facultyForm.contact || !facultyForm.email || !facultyForm.course}
-            >
-              {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2"></span>
-                  Saving...
-                </>
-              ) : editIndex !== null ? (
-                "💾 Update Faculty"
-              ) : (
-                "➕ Add Faculty"
-              )}
-            </button>
-
-            {editIndex !== null && (
+            <div className="d-flex gap-3 mt-4">
               <button 
-                className="btn btn-secondary w-100 py-3 fs-5" 
-                onClick={resetForm}
+                className="btn btn-primary w-100 py-3 fs-5" 
+                onClick={submitFaculty}
+                disabled={loading || !facultyForm.name || !facultyForm.contact || !facultyForm.email || !facultyForm.course}
               >
-                ❌ Cancel
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                    Saving...
+                  </>
+                ) : editIndex !== null ? (
+                  "💾 Update Faculty"
+                ) : (
+                  "➕ Add Faculty"
+                )}
               </button>
-            )}
+
+              {editIndex !== null && (
+                <button 
+                  className="btn btn-secondary w-100 py-3 fs-5" 
+                  onClick={resetForm}
+                >
+                  ❌ Cancel
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* FILTERS - NO DEPARTMENT */}
-      <div className="card shadow p-4 mb-4">
-        <h5 className="mb-3">🔍 Quick Filters</h5>
-        <div className="row g-3">
-          <div className="col-md-5">
-            <input 
-              className="form-control" 
-              placeholder="Faculty Name" 
-              value={filters.name}
-              onChange={(e) => setFilters({...filters, name: e.target.value})}
-            />
-          </div>
-          <div className="col-md-5">
-            <input 
-              className="form-control" 
-              placeholder="Course" 
-              value={filters.course}
-              onChange={(e) => setFilters({...filters, course: e.target.value})}
-            />
-          </div>
-          <div className="col-md-2">
-            <button 
-              className="btn btn-outline-secondary w-100" 
-              onClick={() => setFilters({ name: "", course: "" })}
-            >
-              🧹 Clear
-            </button>
-          </div>
-        </div>
-      </div>
+     
 
-      {/* TABLE - NO DEPARTMENT */}
+      {/* TABLE */}
       <div className="card shadow">
-        <div className="card-header bg-success text-white p-4">
-          <div className="d-flex justify-content-between align-items-center">
-            <h4>📋 Faculty List ({filteredFaculties.length}/{faculties.length})</h4>
-            <button className="btn btn-light" onClick={fetchFaculties}>
-              🔄 Refresh
-            </button>
+        <div className="card-header bg-success text-white">
+          <div className="d-flex ">
+            {/* ✅ SEPARATE REUSABLE FILTER COMPONENT */}
+      <UnifiedSearchFilter 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        placeholder="Search by name, contact, email, or course..."
+      />
           </div>
         </div>
         <div className="table-responsive">
@@ -353,7 +341,7 @@ export default function Faculty() {
               ) : (
                 <tr>
                   <td colSpan="6" className="text-center py-5 text-muted">
-                    {Object.values(filters).some(f => f) 
+                    {searchTerm 
                       ? "❌ No matching faculty found" 
                       : "📭 No faculty added yet. Add your first faculty above!"
                     }

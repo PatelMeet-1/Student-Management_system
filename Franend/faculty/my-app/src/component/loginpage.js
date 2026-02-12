@@ -1,121 +1,236 @@
 import React, { useState } from "react";
+import { Card, Form, Button, Alert, Container } from "react-bootstrap";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { FaUserTie, FaEye, FaEyeSlash } from "react-icons/fa";
 
-export default function FacultyLogin() {
-  const navigate = useNavigate();
-
+export default function FacultyLoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState(0); // 0=login, 1=forgot, 2=reset
+  const [fpEmail, setFpEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    console.log("🔍 LOGIN:", cleanEmail);
+
+    setError(""); setSuccess(""); setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/faculty/login/faculty",
-        { email, password }
-      );
+      const res = await axios.post("http://localhost:3000/api/faculty/login/faculty", {
+        email: cleanEmail,
+        password: cleanPassword,
+      });
 
-      if (res.data.success) {
-        const loggedInFaculty = res.data.faculty;
+      console.log("✅ SUCCESS:", res.data);
 
-        // Save faculty-specific data
-        localStorage.setItem("facultyToken", res.data.token);
-        localStorage.setItem("currentFacultyId", loggedInFaculty._id);
-        localStorage.setItem("facultyData", JSON.stringify(loggedInFaculty));
-        localStorage.setItem(
-          "completeFacultyData",
-          JSON.stringify(loggedInFaculty)
-        );
+      localStorage.setItem("facultyToken", res.data.token);
+      localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
+      
+      setSuccess(`✅ Welcome ${res.data.faculty.name}!`);
+      
+      setTimeout(() => {
+        window.location.href = "/faculty/dashboard";
+      }, 1500);
 
-        toast.success(`Welcome ${loggedInFaculty.name} 🎉`);
-        setTimeout(() => navigate("/faculty-dashboard"), 1500);
-      } else {
-        toast.error(res.data.message);
-      }
-    } catch (error) {
-      console.error("❌ Login Error:", error.response?.data);
-      toast.error(error.response?.data?.message || "Server Error");
+    } catch (err) {
+      console.error("💥 ERROR:", err.response?.data);
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    const cleanEmail = fpEmail.trim().toLowerCase();
+    setError(""); setSuccess(""); setLoading(true);
+
+    try {
+      const res = await axios.post("http://localhost:3000/api/faculty/forgot-password", {
+        email: cleanEmail,
+      });
+      setSuccess("✅ OTP sent! Check email.");
+      setStep(2);
+    } catch (err) {
+      setError(err.response?.data?.message || "OTP failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    
+    if (newPass !== confirmPass) {
+      setError("Passwords don't match");
+      return;
+    }
+    if (newPass.length < 6) {
+      setError("Password must be 6+ characters");
+      return;
+    }
+
+    setError(""); setSuccess(""); setLoading(true);
+
+    try {
+      await axios.post("http://localhost:3000/api/faculty/reset-password-otp", {
+        email: fpEmail.trim().toLowerCase(),
+        otp: otp.trim(),
+        newPassword: newPass,
+      });
+      
+      setSuccess("✅ Password reset! Login now.");
+      setTimeout(() => {
+        setStep(0);
+        setEmail(fpEmail);
+        setPassword("");
+      }, 2000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Reset failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-center"
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea, #764ba2)",
-      }}
-    >
-      <ToastContainer />
+    <Container className="py-5">
+      <Card className="p-4 shadow mx-auto" style={{ maxWidth: 420 }}>
+        <h4 className="text-center mb-4 text-primary fw-bold">
+          {step === 0 && "👨‍🏫 Faculty Login"}
+          {step === 1 && "📧 Forgot Password"}
+          {step === 2 && "🔑 Reset Password"}
+        </h4>
 
-      <div
-        className="card p-4 shadow-lg border-0"
-        style={{ width: "380px", borderRadius: "15px" }}
-      >
-        <div className="text-center mb-3">
-          <FaUserTie size={45} className="text-primary mb-2" />
-          <h4 className="fw-bold">Faculty Login</h4>
-          <p className="text-muted mb-0">Login to your dashboard</p>
-        </div>
+        {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
+        {success && <Alert variant="success" className="mb-3">{success}</Alert>}
 
-        <form onSubmit={handleLogin}>
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Email</label>
-            <input
-              type="email"
-              className="form-control"
-              placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+        {/* LOGIN */}
+        {step === 0 && (
+          <Form onSubmit={handleLogin}>
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </Form.Group>
 
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Password</label>
-            <div className="input-group">
-              <input
-                type={showPassword ? "text" : "password"}
-                className="form-control"
-                placeholder="Enter password"
+            <Form.Group className="mb-4">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <span
-                className="input-group-text"
-                style={{ cursor: "pointer" }}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
+            </Form.Group>
+
+            <Button type="submit" className="w-100 py-2 fw-bold" disabled={loading}
+              style={{ background: "linear-gradient(45deg, #667eea, #764ba2)", border: "none" }}
+            >
+              {loading ? "🔄 Logging in..." : "🚀 Login"}
+            </Button>
+
+            <Button
+              variant="link"
+              className="w-100 p-0 mt-2 text-danger fw-semibold text-decoration-none"
+              onClick={() => setStep(1)}
+            >
+              🔑 Forgot Password?
+            </Button>
+          </Form>
+        )}
+
+        {/* FORGOT PASSWORD */}
+        {step === 1 && (
+          <Form onSubmit={handleSendOTP}>
+            <Form.Group className="mb-4">
+              <Form.Label>Faculty Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={fpEmail}
+                onChange={(e) => setFpEmail(e.target.value)}
+                required
+              />
+            </Form.Group>
+
+            <Button type="submit" className="w-100 py-2 fw-bold mb-2" disabled={loading}
+              style={{ background: "linear-gradient(45deg, #ff6b6b, #ee5a24)", border: "none" }}
+            >
+              {loading ? "📤 Sending..." : "📧 Send OTP"}
+            </Button>
+
+            <Button
+              variant="outline-secondary"
+              className="w-100 py-2"
+              onClick={() => { setStep(0); setError(""); }}
+            >
+              ← Back to Login
+            </Button>
+          </Form>
+        )}
+
+        {/* RESET PASSWORD */}
+        {step === 2 && (
+          <Form onSubmit={handleResetPassword}>
+            <Form.Group className="mb-3">
+              <Form.Label>OTP (6 digits)</Form.Label>
+              <Form.Control
+                type="text"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>New Password</Form.Label>
+              <Form.Control
+                type="password"
+                value={newPass}
+                onChange={(e) => setNewPass(e.target.value)}
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Label>Confirm Password</Form.Label>
+              <Form.Control
+                type="password"
+                value={confirmPass}
+                onChange={(e) => setConfirmPass(e.target.value)}
+                required
+              />
+            </Form.Group>
+
+            <Button type="submit" className="w-100 py-2 fw-bold mb-2" disabled={loading}
+              style={{ background: "linear-gradient(45deg, #28a745, #20c997)", border: "none" }}
+            >
+              {loading ? "🔄 Resetting..." : "✅ Reset Password"}
+            </Button>
+
+            <div className="d-grid gap-2">
+              <Button variant="outline-primary" size="sm" onClick={handleSendOTP} disabled={loading}>
+                🔄 Resend OTP
+              </Button>
+              <Button variant="outline-secondary" size="sm" onClick={() => setStep(0)}>
+                ← Back to Login
+              </Button>
             </div>
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary w-100 fw-semibold"
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
-
-        <div className="text-center mt-3">
-          <small className="text-muted">© 2026 Faculty Portal</small>
-        </div>
-      </div>
-    </div>
+          </Form>
+        )}
+      </Card>
+    </Container>
   );
 }

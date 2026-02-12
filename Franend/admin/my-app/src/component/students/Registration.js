@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import Filter from "../faculty/filter1"; // ✅ MOVED TO TOP - Fix ESLint issue
+import { ToastContainer, toast } from "react-toastify"; // ✅ Toastify AFTER Filter
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -8,6 +9,7 @@ export default function AddStudent() {
   const API_URL = "http://localhost:3000/api/users";
   const COURSES_URL = "http://localhost:3000/api/courses";
 
+  // ✅ ALL STATES (including searchTerm - defined BEFORE use)
   const [studentForm, setStudentForm] = useState({
     name: "",
     age: "",
@@ -26,12 +28,8 @@ export default function AddStudent() {
   const [courses, setCourses] = useState([]);
   const [selectedCourseDepts, setSelectedCourseDepts] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
-  const [filters, setFilters] = useState({
-    enrollment: "",
-    course: "",
-    department: "",
-    name: "",
-  });
+  const [searchTerm, setSearchTerm] = useState(""); // ✅ DEFINED HERE
+  const [showForm, setShowForm] = useState(false);
 
   // LOAD USERS
   const loadUsers = async () => {
@@ -124,20 +122,7 @@ export default function AddStudent() {
         toast.success("✅ Student Added!");
       }
 
-      setStudentForm({
-        name: "",
-        age: "",
-        contact: "",
-        email: "",
-        password: "",
-        course: "",
-        department: "",
-        EnrollmentNo: "",
-        photo: "",
-      });
-      setSelectedPhoto(null);
-      setPhotoPreview("");
-      setSelectedCourseDepts([]);
+      resetForm();
       loadUsers();
     } catch (error) {
       console.error("Error submitting student:", error);
@@ -153,6 +138,7 @@ export default function AddStudent() {
       department: user.department || "",
     });
     setEditId(user._id);
+    setShowForm(true);
 
     if (user.course) {
       const selectedCourse = courses.find(
@@ -188,19 +174,35 @@ export default function AddStudent() {
     }
   };
 
-  // FILTERED USERS
-  const filteredUsers = users.filter(
-    (user) =>
-      (user.EnrollmentNo || "")
-        .toLowerCase()
-        .includes(filters.enrollment.toLowerCase()) &&
-      (user.course || "")
-        .toLowerCase()
-        .includes(filters.course.toLowerCase()) &&
-      (user.department || "")
-        .toLowerCase()
-        .includes(filters.department.toLowerCase()) &&
-      (user.name || "").toLowerCase().includes(filters.name.toLowerCase())
+  // RESET FORM
+  const resetForm = () => {
+    setStudentForm({
+      name: "",
+      age: "",
+      contact: "",
+      email: "",
+      password: "",
+      course: "",
+      department: "",
+      EnrollmentNo: "",
+      photo: "",
+    });
+    setSelectedPhoto(null);
+    setPhotoPreview("");
+    setSelectedCourseDepts([]);
+    setEditId(null);
+    setShowForm(false);
+  };
+
+  // ✅ UNIFIED SEARCH ACROSS ALL FIELDS
+  const filteredUsers = users.filter((user) =>
+    searchTerm === "" ||
+    (user.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.EnrollmentNo || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.course || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.department || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.contact || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.email || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loadingCourses) {
@@ -219,219 +221,175 @@ export default function AddStudent() {
     <div className="container mt-4">
       <ToastContainer />
 
-      {/* 👇 Page now starts directly from here */}
+      {/* FORM BUTTON */}
       <h3 className="text-center mb-4">👨‍🎓 Student Manager</h3>
+      <div className="text-center">
+        <button 
+          className="btn btn-primary btn-lg py-3 px-5 fs-4 w-100" 
+          onClick={() => setShowForm(!showForm)}
+        >
+          ➕ Add New Student
+        </button>
+      </div>
 
-      {/* FORM */}
-      <div className="card shadow mb-4">
-        <div className="card-header bg-primary text-white p-3">
-          <h5>{editId ? "✏️ Edit Student" : "➕ Add Student"}</h5>
-        </div>
-        <div className="card-body p-4">
-          <div className="row g-3">
-            <div className="col-md-6">
-              <input
-                className="form-control"
-                placeholder="👤 Name *"
-                value={studentForm.name}
-                onChange={(e) =>
-                  setStudentForm({ ...studentForm, name: e.target.value })
-                }
-              />
-            </div>
-            <div className="col-md-3">
-              <input
-                className="form-control"
-                placeholder="📅 Age"
-                value={studentForm.age}
-                onChange={(e) =>
-                  setStudentForm({ ...studentForm, age: e.target.value })
-                }
-              />
-            </div>
-            <div className="col-md-3">
-              <input
-                className="form-control"
-                placeholder="📱 Contact"
-                value={studentForm.contact}
-                onChange={(e) =>
-                  setStudentForm({ ...studentForm, contact: e.target.value })
-                }
-              />
-            </div>
-            <div className="col-md-6">
-              <input
-                className="form-control"
-                type="email"
-                placeholder="✉️ Email"
-                value={studentForm.email}
-                onChange={(e) =>
-                  setStudentForm({ ...studentForm, email: e.target.value })
-                }
-              />
-            </div>
-            <div className="col-md-6">
-              <input
-                className="form-control"
-                type="password"
-                placeholder="🔐 Password"
-                value={studentForm.password}
-                onChange={(e) =>
-                  setStudentForm({ ...studentForm, password: e.target.value })
-                }
-              />
-            </div>
-            <div className="col-md-6">
-              <select
-                className="form-select"
-                value={studentForm.course}
-                onChange={(e) => handleCourseChange(e.target.value)}
-              >
-                <option value="">🎓 Select Course</option>
-                {courses.map((course) => (
-                  <option key={course._id} value={course.name}>
-                    {course.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="col-md-6">
-              <select
-                className="form-select"
-                value={studentForm.department}
-                onChange={(e) =>
-                  setStudentForm({ ...studentForm, department: e.target.value })
-                }
-                disabled={!studentForm.course}
-              >
-                <option value="">
-                  {studentForm.course
-                    ? "🏢 Select Department"
-                    : "First select course"}
-                </option>
-                {selectedCourseDepts.map((dept, index) => (
-                  <option key={index} value={dept}>
-                    {dept}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="col-12">
-              <input
-                className="form-control"
-                placeholder="🆔 Enrollment No *"
-                value={studentForm.EnrollmentNo}
-                onChange={(e) =>
-                  setStudentForm({
-                    ...studentForm,
-                    EnrollmentNo: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="col-12">
-              <label className="form-label fw-bold mb-2">📸 Photo</label>
-              <input
-                type="file"
-                className="form-control"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-              />
-              {photoPreview && (
-                <img
-                  src={photoPreview}
-                  alt="Preview"
-                  className="mt-2 rounded shadow"
-                  style={{
-                    width: 100,
-                    height: 100,
-                    objectFit: "cover",
-                  }}
+      {/* FORM - HIDE/SHOW */}
+      {showForm && (
+        <div className="card shadow">
+          
+          <div className="card-body p-4">
+            <div className="row g-3">
+              <div className="col-md-6">
+                <input
+                  className="form-control"
+                  placeholder="👤 Name *"
+                  value={studentForm.name}
+                  onChange={(e) =>
+                    setStudentForm({ ...studentForm, name: e.target.value })
+                  }
                 />
-              )}
+              </div>
+              <div className="col-md-3">
+                <input
+                  className="form-control"
+                  placeholder="📅 Age"
+                  value={studentForm.age}
+                  onChange={(e) =>
+                    setStudentForm({ ...studentForm, age: e.target.value })
+                  }
+                />
+              </div>
+              <div className="col-md-3">
+                <input
+                  className="form-control"
+                  placeholder="📱 Contact"
+                  value={studentForm.contact}
+                  onChange={(e) =>
+                    setStudentForm({ ...studentForm, contact: e.target.value })
+                  }
+                />
+              </div>
+              <div className="col-md-6">
+                <input
+                  className="form-control"
+                  type="email"
+                  placeholder="✉️ Email"
+                  value={studentForm.email}
+                  onChange={(e) =>
+                    setStudentForm({ ...studentForm, email: e.target.value })
+                  }
+                />
+              </div>
+              <div className="col-md-6">
+                <input
+                  className="form-control"
+                  type="password"
+                  placeholder="🔐 Password"
+                  value={studentForm.password}
+                  onChange={(e) =>
+                    setStudentForm({ ...studentForm, password: e.target.value })
+                  }
+                />
+              </div>
+              <div className="col-md-6">
+                <select
+                  className="form-select"
+                  value={studentForm.course}
+                  onChange={(e) => handleCourseChange(e.target.value)}
+                >
+                  <option value="">🎓 Select Course</option>
+                  {courses.map((course) => (
+                    <option key={course._id} value={course.name}>
+                      {course.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-md-6">
+                <select
+                  className="form-select"
+                  value={studentForm.department}
+                  onChange={(e) =>
+                    setStudentForm({ ...studentForm, department: e.target.value })
+                  }
+                  disabled={!studentForm.course}
+                >
+                  <option value="">
+                    {studentForm.course
+                      ? "🏢 Select Department"
+                      : "First select course"}
+                  </option>
+                  {selectedCourseDepts.map((dept, index) => (
+                    <option key={index} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-12">
+                <input
+                  className="form-control"
+                  placeholder="🆔 Enrollment No *"
+                  value={studentForm.EnrollmentNo}
+                  onChange={(e) =>
+                    setStudentForm({
+                      ...studentForm,
+                      EnrollmentNo: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="col-12">
+                <label className="form-label fw-bold mb-2">📸 Photo</label>
+                <input
+                  type="file"
+                  className="form-control"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                />
+                {photoPreview && (
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
+                    className="mt-2 rounded shadow"
+                    style={{
+                      width: 100,
+                      height: 100,
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-          <button
-            className="btn btn-primary w-100 mt-4 py-2 fs-5"
-            onClick={submitStudent}
-          >
-            {editId ? "💾 Update Student" : "➕ Add Student"}
-          </button>
-        </div>
-      </div>
-
-      {/* FILTERS */}
-      <div className="card p-3 mb-4">
-        <h6>🔍 Filters</h6>
-        <div className="row g-2">
-          <div className="col-md-3">
-            <input
-              className="form-control"
-              placeholder="Enrollment No"
-              value={filters.enrollment}
-              onChange={(e) =>
-                setFilters({ ...filters, enrollment: e.target.value })
-              }
-            />
-          </div>
-          <div className="col-md-3">
-            <input
-              className="form-control"
-              placeholder="Name"
-              value={filters.name}
-              onChange={(e) =>
-                setFilters({ ...filters, name: e.target.value })
-              }
-            />
-          </div>
-          <div className="col-md-3">
-            <input
-              className="form-control"
-              placeholder="Course"
-              value={filters.course}
-              onChange={(e) =>
-                setFilters({ ...filters, course: e.target.value })
-              }
-            />
-          </div>
-          <div className="col-md-2">
-            <input
-              className="form-control"
-              placeholder="Department"
-              value={filters.department}
-              onChange={(e) =>
-                setFilters({ ...filters, department: e.target.value })
-              }
-            />
-          </div>
-          <div className="col-md-1">
             <button
-              className="btn btn-outline-secondary w-100"
-              onClick={() =>
-                setFilters({
-                  enrollment: "",
-                  name: "",
-                  course: "",
-                  department: "",
-                })
-              }
+              className="btn btn-primary w-100 mt-4 py-2 fs-5"
+              onClick={submitStudent}
             >
-              🧹
+              {editId ? "💾 Update Student" : "➕ Add Student"}
             </button>
+            {editId && (
+              <button
+                className="btn btn-secondary w-100 mt-2 py-2 fs-5"
+                onClick={resetForm}
+              >
+                ❌ Cancel
+              </button>
+            )}
           </div>
         </div>
-      </div>
+      )}
+
+      
 
       {/* STUDENTS TABLE */}
-      <div className="card shadow">
-        <div className="card-header bg-success text-white p-3">
+      <div className="card shadow mt-3">
+        <div className="card-header bg-success text-white ">
           <div className="d-flex justify-content-between align-items-center">
-            <h5>
-              📋 All Students ({filteredUsers.length}/{users.length})
-            </h5>
-            <button className="btn btn-light btn-sm" onClick={loadUsers}>
-              🔄 Refresh
-            </button>
+           {/* ✅ UNIFIED FILTER - Perfect placement */}
+      <Filter 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        placeholder="Search students by name, enrollment, course, dept..."
+      />
           </div>
         </div>
         <div className="table-responsive">
@@ -453,9 +411,10 @@ export default function AddStudent() {
               {filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan="9" className="text-center py-5 text-muted">
-                    {Object.values(filters).some((f) => f)
-                      ? "❌ No matches"
-                      : "📭 No students"}
+                    {searchTerm 
+                      ? "❌ No matching students found" 
+                      : "📭 No students added yet"
+                    }
                   </td>
                 </tr>
               ) : (

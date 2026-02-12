@@ -3,17 +3,18 @@ const router = express.Router();
 const controller = require("../controllers/Userontroller");
 const upload = require("../middleware/upload"); // multer setup
 
-// ================== USERS ==================
+// USERS CRUD
 router.get("/", controller.getUsers); // Get all users
-router.post("/", upload.single("photo"), controller.createUser); // Create new user
-router.post("/login", controller.loginUser); // Login endpoint
-router.put("/password", controller.updatePassword); // Update password
-
-// ================== STUDENT DETAILS UPDATE WITH PHOTO ==================
-router.put("/student-details", upload.single("photo"), controller.updateStudentDetails);
-
-// ================== USER CRUD ==================
+router.post("/", upload.single("photo"), controller.createUser); // Create user
 router.put("/:id", upload.single("photo"), controller.updateUser); // Update user
 router.delete("/:id", controller.deleteUser); // Delete user
+
+// LOGIN + PASSWORD
+router.post("/login", controller.loginUser);
+router.put("/password", controller.updatePassword);
+
+// OTP / RESET
+router.post("/send-otp", controller.sendOtp);
+router.post("/reset-password", controller.resetPassword);
 
 module.exports = router;

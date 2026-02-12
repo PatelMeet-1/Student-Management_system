@@ -11,26 +11,30 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  // ===== FORGOT STATES =====
+  // ===== FORGOT / OTP STATES =====
   const [showForgot, setShowForgot] = useState(false);
-  const [oldUsername, setOldUsername] = useState("");
-  const [newUsername, setNewUsername] = useState("");
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [fpMsg, setFpMsg] = useState("");
   const [fpError, setFpError] = useState("");
+  const [fpMsg, setFpMsg] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // ===== OTP RESET =====
+  const [showOTP, setShowOTP] = useState(false);
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassOTP, setNewPassOTP] = useState("");
+  const [newUsername, setNewUsername] = useState("");
+  const [otpMsg, setOtpMsg] = useState("");
+  const [otpError, setOtpError] = useState("");
 
   // ===== LOGIN =====
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/admin/login",
-        { username, password }
-      );
+      const res = await axios.post("http://localhost:3000/api/admin/login", {
+        username,
+        password,
+      });
       localStorage.setItem("adminToken", res.data.token);
       navigate("/students", { replace: true });
     } catch (err) {
@@ -38,46 +42,46 @@ export default function AdminLogin() {
     }
   };
 
-  // ===== CHANGE USERNAME =====
-  const handleChangeUsername = async () => {
-    setFpError("");
-    setFpMsg("");
+  // ===== SEND OTP =====
+  const handleSendOTP = async () => {
+    setOtpError("");
+    setOtpMsg("");
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/api/admin/change-username", {
-        oldUsername,
-        newUsername,
-      });
-      setFpMsg("✅ Username updated successfully");
-      setOldUsername("");
-      setNewUsername("");
+      await axios.post("http://localhost:3000/api/admin/send-otp", { email });
+      setOtpMsg("✅ OTP sent to your email");
+      setShowOTP(true);
     } catch (err) {
-      setFpError(
-        err.response?.data?.message || "❌ Username update failed"
-      );
+      setOtpError(err.response?.data?.message || "❌ OTP sending failed");
     } finally {
       setLoading(false);
     }
   };
 
-  // ===== CHANGE PASSWORD =====
-  const handleChangePassword = async () => {
-    setFpError("");
-    setFpMsg("");
+  // ===== VERIFY OTP & RESET PASSWORD / USERNAME =====
+  const handleVerifyOTP = async () => {
+    setOtpError("");
+    setOtpMsg("");
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/api/admin/change-password", {
-        username: oldUsername || username,
-        oldPassword,
-        newPassword,
-      });
-      setFpMsg("✅ Password updated successfully");
-      setOldPassword("");
-      setNewPassword("");
-    } catch (err) {
-      setFpError(
-        err.response?.data?.message || "❌ Password update failed"
+      // Build body dynamically based on what user entered
+      const body = { email, otp };
+      if (newUsername.trim() !== "") body.newUsername = newUsername;
+      if (newPassOTP.trim() !== "") body.newPassword = newPassOTP;
+
+      await axios.post(
+        "http://localhost:3000/api/admin/reset-username-password",
+        body
       );
+
+      setOtpMsg("✅ Account updated successfully");
+      setShowOTP(false);
+      setEmail("");
+      setOtp("");
+      setNewPassOTP("");
+      setNewUsername("");
+    } catch (err) {
+      setOtpError(err.response?.data?.message || "❌ OTP verification failed");
     } finally {
       setLoading(false);
     }
@@ -98,7 +102,6 @@ export default function AdminLogin() {
         className="card shadow-lg p-4"
         style={{ width: 380, borderRadius: 15, border: "none" }}
       >
-        {/* HEADER */}
         <div className="text-center mb-4">
           <div
             style={{
@@ -169,28 +172,16 @@ export default function AdminLogin() {
               borderRadius: 10,
             }}
           >
-            Login
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-outline-primary w-100 fw-bold mt-3"
-            style={{ borderRadius: 10 }}
-            onClick={() => (window.location.href = "http://localhost:3002/")}
-          >
-            User Login
+            Admin Login
           </button>
         </form>
 
-        <div
-          className="text-center mt-3 text-muted"
-          style={{ fontSize: 13 }}
-        >
+        <div className="text-center mt-3 text-muted" style={{ fontSize: 13 }}>
           © {new Date().getFullYear()} SRMS Admin Panel
         </div>
       </div>
 
-      {/* ===== FORGOT MODAL ===== */}
+      {/* ===== FORGOT / OTP MODAL ===== */}
       {showForgot && (
         <div
           className="modal fade show d-block"
@@ -203,74 +194,99 @@ export default function AdminLogin() {
                 <button
                   type="button"
                   className="btn-close"
-                  onClick={() => setShowForgot(false)}
+                  onClick={() => {
+                    setShowForgot(false);
+                    setShowOTP(false);
+                  }}
                 ></button>
               </div>
 
               <div className="modal-body">
-                {fpError && (
-                  <div className="alert alert-danger py-2">{fpError}</div>
-                )}
-                {fpMsg && (
-                  <div className="alert alert-success py-2">{fpMsg}</div>
+                {/* STEP 1 → SEND OTP */}
+                {!showOTP && (
+                  <>
+                    {fpError && (
+                      <div className="alert alert-danger py-2">{fpError}</div>
+                    )}
+                    {fpMsg && (
+                      <div className="alert alert-success py-2">{fpMsg}</div>
+                    )}
+
+                    <label className="fw-semibold">Registered Email</label>
+                    <input
+                      type="email"
+                      className="form-control mb-2"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter registered email"
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-warning w-100 mb-3"
+                      onClick={handleSendOTP}
+                      disabled={loading || !email}
+                    >
+                      {loading ? "Sending OTP..." : "Send OTP"}
+                    </button>
+                  </>
                 )}
 
-                {/* CHANGE USERNAME */}
-                <label className="fw-semibold">Old Username</label>
-                <input
-                  className="form-control mb-2"
-                  value={oldUsername}
-                  onChange={(e) => setOldUsername(e.target.value)}
-                  placeholder="Old Username"
-                />
-                <label className="fw-semibold">New Username</label>
-                <input
-                  className="form-control mb-3"
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  placeholder="New Username"
-                />
-                <button
-                  type="button"
-                  className="btn btn-primary w-100 mb-3"
-                  onClick={handleChangeUsername}
-                  disabled={loading}
-                >
-                  {loading ? "Updating..." : "Update Username"}
-                </button>
+                {/* STEP 2 → VERIFY OTP + RESET */}
+                {showOTP && (
+                  <>
+                    {otpError && (
+                      <div className="alert alert-danger py-2">{otpError}</div>
+                    )}
+                    {otpMsg && (
+                      <div className="alert alert-success py-2">{otpMsg}</div>
+                    )}
 
-                {/* CHANGE PASSWORD */}
-                <label className="fw-semibold">Old Password</label>
-                <input
-                  type="password"
-                  className="form-control mb-2"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  placeholder="Old Password"
-                />
-                <label className="fw-semibold">New Password</label>
-                <input
-                  type="password"
-                  className="form-control mb-3"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="New Password"
-                />
-                <button
-                  type="button"
-                  className="btn btn-success w-100"
-                  onClick={handleChangePassword}
-                  disabled={loading}
-                >
-                  {loading ? "Updating..." : "Update Password"}
-                </button>
+                    <label className="fw-semibold">OTP</label>
+                    <input
+                      className="form-control mb-2"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      placeholder="Enter OTP"
+                    />
+
+                    <label className="fw-semibold">New Password</label>
+                    <input
+                      type="password"
+                      className="form-control mb-2"
+                      value={newPassOTP}
+                      onChange={(e) => setNewPassOTP(e.target.value)}
+                      placeholder="Enter new password"
+                    />
+
+                    <label className="fw-semibold">New Username (Optional)</label>
+                    <input
+                      type="text"
+                      className="form-control mb-3"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      placeholder="Enter new username"
+                    />
+
+                    <button
+                      type="button"
+                      className="btn btn-success w-100"
+                      onClick={handleVerifyOTP}
+                      disabled={loading || (!newPassOTP && !newUsername)}
+                    >
+                      {loading ? "Updating..." : "Verify & Update"}
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setShowForgot(false)}
+                  onClick={() => {
+                    setShowForgot(false);
+                    setShowOTP(false);
+                  }}
                 >
                   Close
                 </button>

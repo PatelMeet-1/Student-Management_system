@@ -29,19 +29,23 @@ export default function FinalResultTable({ loggedUser }) {
   const [loading, setLoading] = useState(true);
   const [expandedSemester, setExpandedSemester] = useState(null);
 
-  // ================= FETCH RESULTS =================
+  // ================= FETCH ONLY PUBLISHED RESULTS =================
   useEffect(() => {
     if (!loggedUser?._id) return;
 
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(RESULTS_API);
+        // 🔥 FIXED: SIRF PUBLISHED RESULTS
+        const res = await axios.get(`${RESULTS_API}/published`);
         const data = Array.isArray(res.data) ? res.data : res.data.data || [];
 
-        // Only logged-in student's results
+        // Only logged-in student's PUBLISHED results
         const userResults = data.filter(
-          (r) => r.studentId && String(r.studentId._id) === String(loggedUser._id)
+          (r) => 
+            r.studentId && 
+            String(r.studentId._id) === String(loggedUser._id) &&
+            r.published === true  // 🔥 PUBLISHED CHECK
         );
 
         // Group results by semester
@@ -97,7 +101,7 @@ export default function FinalResultTable({ loggedUser }) {
       return { ...s, percentage: percent.toFixed(2), grade };
     });
 
-    const status = checkPassFail(subjectsWithGrades); // FAIL if any subject <33%
+    const status = checkPassFail(subjectsWithGrades);
     const gradePointMap = { "A+":10, "A":9, "B+":8, "B":7, "C+":6, "C":5, "D":4, "F":0 };
     const spi = subjectsWithGrades.length
       ? (subjectsWithGrades.reduce((sum, s) => sum + gradePointMap[s.grade], 0) / subjectsWithGrades.length).toFixed(2)
@@ -185,7 +189,7 @@ export default function FinalResultTable({ loggedUser }) {
                                   {s.percentage < 33 ? "FAIL" : "PASS"}
                                 </td>
                               </tr>
-                          ))}
+                            ))}
                         </tbody>
                       </Table>
                     </div>

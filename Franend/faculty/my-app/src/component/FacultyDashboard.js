@@ -10,6 +10,7 @@ export default function FacultyDashboard() {
   const [faculty, setFaculty] = useState(null);
   const [email, setEmail] = useState("");
   const [contact, setContact] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // ================= LOAD FACULTY DATA =================
   useEffect(() => {
@@ -20,18 +21,34 @@ export default function FacultyDashboard() {
       return;
     }
 
-    const data = JSON.parse(storedData);
-    setFaculty(data);
-    setEmail(data.email || "");
-    setContact(data.contact || "");
+    try {
+      const data = JSON.parse(storedData);
+      setFaculty(data);
+      setEmail(data.email || "");
+      setContact(data.contact || "");
+    } catch (error) {
+      console.error("Invalid faculty data");
+      localStorage.removeItem("facultyData");
+      navigate("/login");
+    }
   }, [navigate]);
 
   // ================= UPDATE PROFILE =================
   const updateProfile = async () => {
+    if (!email || !contact) {
+      alert("Please fill all fields ❗");
+      return;
+    }
+
     try {
-      const res = await axios.put(
+      setLoading(true);
+
+      await axios.put(
         `http://localhost:3000/api/faculty/${faculty.id}`,
-        { email, contact }
+        {
+          email,
+          contact,
+        }
       );
 
       const updatedFaculty = {
@@ -44,52 +61,67 @@ export default function FacultyDashboard() {
       setFaculty(updatedFaculty);
 
       alert("Profile Updated Successfully ✅");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       alert("Profile Update Failed ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!faculty) return null;
 
   return (
-    <div className="d-flex">
+    <div className="d-flex min-vh-100">
+      {/* SIDEBAR */}
       <Sidebar />
 
-      <div className="p-4 flex-grow-1">
-        <h3 className="mb-4">Personal Profile</h3>
+      {/* MAIN CONTENT */}
+      <div className="flex-grow-1 p-4 bg-light">
+        <h3 className="mb-4">Faculty Personal Profile</h3>
 
-        <label>Name</label>
-        <input
-          className="form-control mb-2"
-          value={faculty.name}
-          disabled
-        />
+        <div className="card p-4 shadow-sm" style={{ maxWidth: "500px" }}>
+          {/* NAME */}
+          <div className="mb-3">
+            <label className="form-label">Name</label>
+            <input
+              className="form-control"
+              value={faculty.name}
+              disabled
+            />
+          </div>
 
-        <label>Email</label>
-        <input
-          className="form-control mb-2"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          {/* EMAIL */}
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input
+              className="form-control"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        <label>Contact</label>
-        <input
-          className="form-control mb-2"
-          value={contact}
-          onChange={(e) => setContact(e.target.value)}
-        />
+          {/* CONTACT */}
+          <div className="mb-3">
+            <label className="form-label">Contact</label>
+            <input
+              className="form-control"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+            />
+          </div>
 
-        <label>Department</label>
-        <input
-          className="form-control mb-3"
-          value={faculty.department}
-          disabled
-        />
+        
 
-        <button className="btn btn-success" onClick={updateProfile}>
-          Update Profile
-        </button>
+          {/* BUTTON */}
+          <button
+            className="btn btn-success w-100"
+            onClick={updateProfile}
+            disabled={loading}
+          >
+            {loading ? "Updating..." : "Update Profile"}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ import PracticalMarks from "../practicalmarkResult/Practical";
 import Finalresult from "../Final result/Finalresult";
 import CourseSemesterPage from "../CourseSemPage.js/CourseSemesterPage"; 
 import Totalmarks from "../SemesterWiseTotalMarks/SemesterWiseTotalMarks";
-import FinalCertificate from "../Finalcertificate/";
+import FinalCertificate from "../Finalcertificate/Finalcertificate";
 
 
 export default function Main() {

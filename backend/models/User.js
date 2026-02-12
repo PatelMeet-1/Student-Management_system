@@ -1,18 +1,34 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    age: { type: Number },           // ✅ Changed: required: false (controller handles)
-    contact: { type: String },       // ✅ Changed: required: false (controller handles)
+    age: { type: Number },
+    contact: { type: String },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: false },
-    course: { type: String, required: true },      // ✅ CHANGED: Course → course
-    department: { type: String, required: true },  // ✅ ADDED
+    course: { type: String, required: true },
+    department: { type: String, required: true },
     EnrollmentNo: { type: String, required: true, unique: true },
     photo: String,
+    otp: { type: String, select: false },
+    otpExpiry: { type: Date, select: false },
   },
   { timestamps: true }
 );
+
+// Hash password before saving
+userSchema.pre("save", async function () {
+  if (this.isModified("password")) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+});
+
+// Compare password method
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 module.exports = mongoose.model("User", userSchema);

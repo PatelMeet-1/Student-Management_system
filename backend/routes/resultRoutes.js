@@ -1,27 +1,30 @@
-const express = require("express");
-const router = express.Router();
+const express = require("express");  // ✅ FIXED
+const router = express.Router();     // ✅ FIXED
 const ctrl = require("../controllers/resultController");
 
-// ---------------- BASIC ROUTES (TOP PRIORITY) ----------------
-router.get("/", ctrl.getResults);                    // ✅ GET all results
-router.post("/", ctrl.addOrUpdateResult);            // ✅ POST Excel upload
+// 🔥 1️⃣ BASIC ROUTES
+router.get("/", ctrl.getResults);                   
+router.post("/", ctrl.addOrUpdateResult);           
 
-// 🔥 ================= REMEDIAL ROUTE - YE ADD KARO =================
-router.post("/smart-remedial", ctrl.smartRemedial);  // ✅ NEW Remedial Magic!
+// 🔥 2️⃣ PUBLISH ROUTES (CRITICAL!)
+router.get("/published", ctrl.getPublishedResults);  // Student dashboard
+router.patch("/:id/publish", ctrl.togglePublish);    // Publish button
 
-// ---------------- CRITICAL FOR EDIT/DELETE ✅ ----------------
-router.put("/:id", ctrl.updateResult);               // ✅ PUT /api/results/:id (Edit/Save)
-router.get("/:id", ctrl.getResultById);              // ✅ GET single result
-router.delete("/:id", ctrl.deleteResultById);        // ✅ DELETE single result
+// 🔥 3️⃣ REMEDIAL
+router.post("/smart-remedial", ctrl.smartRemedial);  
 
-// ---------------- ADD SUBJECT ----------------
-router.put("/add-subject", ctrl.addSubject);         // ✅ Add new subject
+// 🔥 4️⃣ EDIT/CRUD
+router.put("/:id", ctrl.updateResult);
+router.get("/:id", ctrl.getResultById); 
+router.delete("/:id", ctrl.deleteResultById);
+router.put("/add-subject", ctrl.addSubject);
 
-// ---------------- OTHER ROUTES (OPTIONAL) ----------------
+// 🔥 5️⃣ STUDENT SPECIFIC
 router.get("/student/:studentId", ctrl.getStudentResults);
-// router.put("/publish/:id", ctrl.publishResult);
+
+// 🔥 6️⃣ UTILITY
 router.delete("/semester/:studentId/:Sem", ctrl.deleteSemester);
-router.put("/update-subject", ctrl.updateSubject);   // Legacy
+router.put("/update-subject", ctrl.updateSubject);
 router.delete("/subject/:resultId/:subjectId", ctrl.deleteSubject);
 
 module.exports = router;

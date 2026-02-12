@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { FaChalkboardTeacher, FaUserGraduate, FaClipboardList, FaFlask, FaFileAlt, FaClock, FaSignOutAlt } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function Layout({ active, setActive, children }) {
@@ -10,134 +11,71 @@ export default function Layout({ active, setActive, children }) {
     navigate("/login");
   };
 
-  // ✅ Fixed button height
-  const btnStyle = {
-    height: "44px",
-  };
-
-  // ✅ Fixed sidebar width
   const SIDEBAR_WIDTH = "260px";
 
+  const menuItems = [
+    { key: "course", label: "Add Course & Semester", icon: <FaChalkboardTeacher /> },
+    { key: "faculty", label: "Add Faculty", icon: <FaUserGraduate /> },
+    { key: "students", label: "Add Student", icon: <FaClipboardList /> },
+    { key: "Result", label: "University Result Add", icon: <FaFileAlt /> },
+    { key: "internal", label: "Internal Marks Result", icon: <FaFileAlt /> },
+    { key: "practical", label: "Practical Marks Result", icon: <FaFlask /> },
+    { key: "final", label: "Final Result", icon: <FaFileAlt /> },
+    { key: "circular", label: "Circular", icon: <FaClock /> },
+    { key: "timetable", label: "Timetable", icon: <FaClock /> },
+    // { key: "finalcertificate", label: "Final Certificate", icon: <FaFileAlt /> },
+  ];
+
   return (
-    <div className="min-vh-100">
-      {/* ================= FIXED SIDEBAR ================= */}
+    <div className="d-flex min-vh-100">
+      {/* ================= SIDEBAR ================= */}
       <div
-        className="bg-dark text-white p-3 d-flex flex-column position-fixed top-0 start-0"
+        className="d-flex flex-column p-3 position-fixed top-0 start-0"
         style={{
           width: SIDEBAR_WIDTH,
           height: "100vh",
+          background: "linear-gradient(to bottom, #0f2027, #203a43, #2c5364)",
+          color: "#fff",
           overflowY: "auto",
+          boxShadow: "2px 0 8px rgba(0,0,0,0.2)",
         }}
       >
-        <h4 className="text-center text-info mb-4">
+        <h3
+          className="text-center mb-4"
+          style={{ color: "#00ffe0", fontWeight: "700" }}
+        >
           ADMIN PANEL
-        </h4>
+        </h3>
 
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "course" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("course")}
-        >
-          Add Course & Semester
-        </button>
-
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "faculty" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("faculty")}
-        >
-          Add Faculty
-        </button>
-
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "students" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("students")}
-        >
-          Add Student
-        </button>
-
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "Result" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("Result")}
-        >
-          University Result Add
-        </button>
-
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "internal" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("internal")}
-        >
-          Internal Marks Result
-        </button>
-
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "practical" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("practical")}
-        >
-          Practical Marks Result
-        </button>
-
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "final" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("final")}
-        >
-          Final Result
-        </button>
-
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "circular" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("circular")}
-        >
-          Circular
-        </button>
-
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "timetable" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("timetable")}
-        >
-          Timetable
-        </button>
-
-        <button
-          style={btnStyle}
-          className={`btn w-100 mb-2 ${
-            active === "finalcertificate" ? "btn-info" : "btn-outline-info"
-          }`}
-          onClick={() => setActive("finalcertificate")}
-        >
-          Final certificate
-        </button>
+        {menuItems.map((item) => (
+          <button
+            key={item.key}
+            className={`btn w-100 mb-2 text-start ${
+              active === item.key
+                ? "bg-info text-dark fw-bold"
+                : "btn-outline-light"
+            }`}
+            style={{
+              height: "45px",
+              borderRadius: "8px",
+              transition: "all 0.3s ease",
+            }}
+            onClick={() => setActive(item.key)}
+          >
+            {item.label}
+          </button>
+        ))}
 
         {/* ================= LOGOUT ================= */}
         <div className="mt-auto pt-3">
           <button
-            style={btnStyle}
             className="btn btn-danger w-100 fw-bold"
+            style={{
+              height: "45px",
+              borderRadius: "8px",
+              fontSize: "16px",
+              transition: "all 0.3s ease",
+            }}
             onClick={handleLogout}
           >
             Logout
@@ -147,9 +85,10 @@ export default function Layout({ active, setActive, children }) {
 
       {/* ================= CONTENT AREA ================= */}
       <div
-        className="bg-light p-4"
+        className="flex-grow-1 p-4"
         style={{
-          marginLeft: SIDEBAR_WIDTH, // 👈 sidebar ke baad content
+          marginLeft: SIDEBAR_WIDTH,
+          background: "#f4f7fa",
           minHeight: "100vh",
         }}
       >

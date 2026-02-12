@@ -1,14 +1,13 @@
 const mongoose = require('mongoose');
 
-const configSchema = new mongoose.Schema({
-  maxMarks: {
-    internal: { type: Number, default: 30 },
-    practical: { type: Number, default: 25 },
-    university: { type: Number, default: 70 },
-    final: { type: Number, default: 100 }
-  },
-  passingRatio: { type: Number, default: 0.33 }, // 33% default
-  updatedAt: { type: Date, default: Date.now }
-}, { collection: 'config' });
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URL);
+    console.log(`✅ MongoDB Connected: ${conn.connection.host} - ${conn.connection.name}`);
+  } catch (error) {
+    console.error('❌ MongoDB Connection FAILED:', error);
+    process.exit(1);
+  }
+};
 
-module.exports = mongoose.model('Config', configSchema);
+module.exports = connectDB;
