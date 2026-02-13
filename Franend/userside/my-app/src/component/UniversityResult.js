@@ -117,42 +117,83 @@ export default function FinalResultTable({ loggedUser }) {
     return (
       <div className="text-center mt-5">
         <Spinner animation="border" />
-        <p>Loading your results...</p>
+        <p className="mt-3">Loading your results...</p>
       </div>
     );
 
   if (!results.length)
     return (
-      <div className="text-center mt-5">
-        <p>No results available for you.</p>
-      </div>
+      <Card className="p-5 text-center shadow">
+        <h5 className="text-muted mb-2">📭 No Results Available</h5>
+        <p className="text-muted mb-0">Your results have not been published yet. Check back later!</p>
+      </Card>
     );
 
   return (
-    <div className="container mt-4">
-      <ToastContainer />
-      <h3 className="text-center mb-4">🎓 Your Semester Results</h3>
-      <p>
-        <b>Name:</b> {loggedUser.name} | <b>Enrollment:</b> {loggedUser.EnrollmentNo}
-      </p>
-      <p>
-        <b>Course:</b> {loggedUser.course} | <b>Department:</b> {loggedUser.department}
-      </p>
+    <div className="container-fluid">
+      <Card className="p-4 shadow mb-4 border-primary">
+        <h3 className="text-primary mb-3">🎓 Your University Results</h3>
+        
+        {/* Student Info Header */}
+        <div className="row p-3 bg-light rounded mb-4">
+          <div className="col-md-3 mb-2 mb-md-0">
+            <p className="text-muted mb-1">Student Name</p>
+            <p className="fw-bold">{loggedUser.name || "N/A"}</p>
+          </div>
+          <div className="col-md-3 mb-2 mb-md-0">
+            <p className="text-muted mb-1">Enrollment No</p>
+            <p className="fw-bold">{loggedUser.EnrollmentNo || "N/A"}</p>
+          </div>
+          <div className="col-md-3 mb-2 mb-md-0">
+            <p className="text-muted mb-1">Course</p>
+            <p className="fw-bold">{loggedUser.course || "N/A"}</p>
+          </div>
+          <div className="col-md-3">
+            <p className="text-muted mb-1">Department</p>
+            <p className="fw-bold">{loggedUser.department || "N/A"}</p>
+          </div>
+        </div>
+      </Card>
 
       {results.map((sem, idx) => {
         const calc = calculateSemester(sem);
         const isExpanded = expandedSemester === sem.Sem;
 
         return (
-          <Card key={idx} className="mb-3 p-3 shadow">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <h5>Semester: {sem.Sem}</h5>
+          <Card key={idx} className="mb-3 p-4 shadow border-secondary">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="text-secondary mb-0">📚 Semester {sem.Sem}</h5>
               <Button
                 size="sm"
+                variant={isExpanded ? "primary" : "outline-primary"}
                 onClick={() => setExpandedSemester(isExpanded ? null : sem.Sem)}
               >
-                {isExpanded ? "Hide" : "View"}
+                {isExpanded ? "📖 Hide Details" : "👁️ View Details"}
               </Button>
+            </div>
+
+            {/* Summary Row */}
+            <div className="row p-2 bg-light rounded mb-3">
+              <div className="col-6 col-md-3 mb-2 mb-md-0 text-center">
+                <p className="text-muted small mb-1">Total Marks</p>
+                <h6 className="mb-0">{calc.totalMarks}/{calc.totalMax}</h6>
+              </div>
+              <div className="col-6 col-md-3 mb-2 mb-md-0 text-center">
+                <p className="text-muted small mb-1">Percentage</p>
+                <h6 className={`mb-0 ${calc.percentage >= 33 ? "text-success" : "text-danger"}`}>
+                  {calc.percentage}%
+                </h6>
+              </div>
+              <div className="col-6 col-md-3 mb-2 mb-md-0 text-center">
+                <p className="text-muted small mb-1">SPI</p>
+                <h6 className="mb-0">{calc.spi}</h6>
+              </div>
+              <div className="col-6 col-md-3 text-center">
+                <p className="text-muted small mb-1">Status</p>
+                <span className={`badge fs-6 px-3 py-2 ${calc.status === "PASS" ? "bg-success" : "bg-danger"}`}>
+                  {calc.status}
+                </span>
+              </div>
             </div>
 
             {isExpanded && (
@@ -161,16 +202,19 @@ export default function FinalResultTable({ loggedUser }) {
                   const subjects = sem[key];
                   if (!subjects.length) return null;
 
+                  const typeLabel = key.replace("Subjects","").toUpperCase();
+                  const typeEmoji = key.includes("internal") ? "📋" : key.includes("practical") ? "🔧" : "🎓";
+
                   return (
-                    <div key={key} className="mb-3">
-                      <h6 className="text-primary text-uppercase">{key.replace("Subjects","")}</h6>
-                      <Table bordered className="text-center">
-                        <thead className="table-dark">
+                    <div key={key} className="mb-4">
+                      <h6 className="text-primary fw-bold mb-3">{typeEmoji} {typeLabel} EXAM</h6>
+                      <Table bordered className="text-center mb-3" responsive>
+                        <thead className="table-primary">
                           <tr>
                             <th>Subject</th>
                             <th>Max Marks</th>
                             <th>Obtained</th>
-                            <th>%</th>
+                            <th>Percentage</th>
                             <th>Grade</th>
                             <th>Status</th>
                           </tr>
@@ -180,13 +224,21 @@ export default function FinalResultTable({ loggedUser }) {
                             .filter(s => s.type === key.replace("Subjects","").toLowerCase())
                             .map((s, i) => (
                               <tr key={i} className={s.percentage < 33 ? "table-danger" : ""}>
-                                <td>{s.name}</td>
+                                <td className="text-start fw-bold">{s.name}</td>
                                 <td>{s.maxMarks}</td>
                                 <td>{s.marks}</td>
-                                <td>{s.percentage}%</td>
-                                <td>{s.grade}</td>
-                                <td className={s.percentage < 33 ? "text-danger" : "text-success"}>
-                                  {s.percentage < 33 ? "FAIL" : "PASS"}
+                                <td>
+                                  <span className={s.percentage < 33 ? "text-danger" : "text-success"}>
+                                    {s.percentage}%
+                                  </span>
+                                </td>
+                                <td>
+                                  <span className="badge bg-info text-dark">{s.grade}</span>
+                                </td>
+                                <td>
+                                  <span className={`badge fs-6 px-2 py-1 ${s.percentage < 33 ? "bg-danger" : "bg-success"}`}>
+                                    {s.percentage < 33 ? "FAIL" : "PASS"}
+                                  </span>
                                 </td>
                               </tr>
                             ))}
@@ -196,14 +248,31 @@ export default function FinalResultTable({ loggedUser }) {
                   );
                 })}
 
-                <Card className="p-2 border-info">
-                  <h6 className="text-center">Combined Semester Result</h6>
-                  <p><b>Total Marks:</b> {calc.totalMarks}/{calc.totalMax}</p>
-                  <p><b>Percentage:</b> {calc.percentage}%</p>
-                  <p><b>SPI:</b> {calc.spi}</p>
-                  <h6 className={`text-center ${calc.status==="PASS"?"text-success":"text-danger"}`}>
-                    FINAL STATUS: {calc.status}
-                  </h6>
+                {/* Combined Result Summary */}
+                <Card className="p-4 bg-gradient border-info">
+                  <h5 className="text-center text-info mb-3">📊 Combined Semester Result</h5>
+                  <div className="row">
+                    <div className="col-md-3 text-center mb-3 mb-md-0">
+                      <p className="text-muted small mb-1">Total Marks</p>
+                      <h6 className="fw-bold text-dark">{calc.totalMarks}/{calc.totalMax}</h6>
+                    </div>
+                    <div className="col-md-3 text-center mb-3 mb-md-0">
+                      <p className="text-muted small mb-1">Percentage</p>
+                      <h6 className={`fw-bold ${calc.percentage >= 33 ? "text-success" : "text-danger"}`}>
+                        {calc.percentage}%
+                      </h6>
+                    </div>
+                    <div className="col-md-3 text-center mb-3 mb-md-0">
+                      <p className="text-muted small mb-1">SPI (Grade Point)</p>
+                      <h6 className="fw-bold text-dark">{calc.spi}/10</h6>
+                    </div>
+                    <div className="col-md-3 text-center">
+                      <p className="text-muted small mb-1">Final Status</p>
+                      <span className={`badge fs-5 px-3 py-2 ${calc.status === "PASS" ? "bg-success" : "bg-danger"}`}>
+                        {calc.status}
+                      </span>
+                    </div>
+                  </div>
                 </Card>
               </>
             )}

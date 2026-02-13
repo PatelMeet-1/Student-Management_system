@@ -53,28 +53,34 @@ export default function StudentDetails({
       }
 
       const formData = new FormData();
-      formData.append("userId", loggedUser._id);
       formData.append("email", editEmail);
       formData.append("contact", editContact);
       if (editPhoto) formData.append("photo", editPhoto);
 
       const res = await axios.put(
-        "http://localhost:3000/api/users/student-details",
-        formData
+        `http://localhost:3000/api/users/${loggedUser._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
-      setStudentDetails(res.data.user);
-      setLoggedUser(res.data.user);
-      localStorage.setItem("loggedUser", JSON.stringify(res.data.user));
+      setStudentDetails(res.data);
+      setLoggedUser(res.data);
+      localStorage.setItem("loggedUser", JSON.stringify(res.data));
 
       setIsEditing(false);
-      toast.success("Details updated successfully", {
+      setEditPhoto(null);
+      toast.success("✅ Details updated successfully!", {
         autoClose: 3000,
       });
       setSuccess("Details updated successfully");
       setError("");
     } catch (err) {
-      toast.error("Failed to update details", {
+      console.error("Update error:", err);
+      toast.error("❌ Failed to update details: " + (err.response?.data?.error || err.message), {
         autoClose: 3000,
       });
       setError("Failed to update details");
@@ -106,79 +112,155 @@ export default function StudentDetails({
       <Card className="p-4 shadow">
         {!isEditing ? (
           <>
-            {/* PHOTO */}
-            <div className="mb-3 text-center">
-              {studentDetails.photo && (
+            {/* PHOTO SECTION */}
+            <div className="mb-4 text-center">
+              {studentDetails.photo ? (
                 <img
                   src={`http://localhost:3000${studentDetails.photo}`}
                   alt="Student"
+                  style={{
+                    width: 140,
+                    height: 140,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "4px solid #007bff",
+                    boxShadow: "0 4px 15px rgba(0,123,255,0.3)",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 140,
+                    height: 140,
+                    borderRadius: "50%",
+                    backgroundColor: "#e9ecef",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "48px",
+                    color: "#6c757d",
+                  }}
+                >
+                  👤
+                </div>
+              )}
+            </div>
+
+            {/* DETAILS DISPLAY */}
+            <div className="row mb-4 p-3 bg-light rounded">
+              <div className="col-md-6 mb-3 mb-md-0">
+                <p className="text-muted small mb-1">Full Name</p>
+                <p className="fw-bold text-dark">{studentDetails.name || "N/A"}</p>
+              </div>
+              <div className="col-md-6">
+                <p className="text-muted small mb-1">Age</p>
+                <p className="fw-bold text-dark">{studentDetails.age || "N/A"}</p>
+              </div>
+            </div>
+
+            <div className="row mb-4 p-3 bg-light rounded">
+              <div className="col-md-6 mb-3 mb-md-0">
+                <p className="text-muted small mb-1">📧 Email Address</p>
+                <p className="fw-bold text-dark">{studentDetails.email || "N/A"}</p>
+              </div>
+              <div className="col-md-6">
+                <p className="text-muted small mb-1">📱 Contact Number</p>
+                <p className="fw-bold text-dark">{studentDetails.contact || "N/A"}</p>
+              </div>
+            </div>
+
+            <div className="row mb-4 p-3 bg-light rounded">
+              <div className="col-md-6 mb-3 mb-md-0">
+                <p className="text-muted small mb-1">Enrollment Number</p>
+                <p className="fw-bold text-dark">{studentDetails.EnrollmentNo || "N/A"}</p>
+              </div>
+              <div className="col-md-6">
+                <p className="text-muted small mb-1">Course</p>
+                <p className="fw-bold text-dark">{studentDetails.course || "N/A"}</p>
+              </div>
+            </div>
+
+            <Button 
+              variant="primary" 
+              className="w-100"
+              onClick={() => setIsEditing(true)}
+            >
+              ✏️ Edit Details
+            </Button>
+          </>
+        ) : (
+          <>
+            <h5 className="mb-4">Update Your Details</h5>
+
+            {/* Photo Preview */}
+            {editPhoto && (
+              <div className="mb-4 p-3 bg-light rounded text-center">
+                <p className="text-muted small mb-2">Photo Preview:</p>
+                <img
+                  src={URL.createObjectURL(editPhoto)}
+                  alt="Preview"
                   style={{
                     width: 120,
                     height: 120,
                     borderRadius: "50%",
                     objectFit: "cover",
+                    border: "3px solid #28a745",
                   }}
                 />
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* DETAILS */}
-            <p><b>Name:</b> {studentDetails.name}</p>
-            <p><b>Age:</b> {studentDetails.age}</p>
-            <p><b>Email:</b> {studentDetails.email}</p>
-            <p><b>Contact:</b> {studentDetails.contact}</p>
-
-            <p>
-              <b>Enrollment No:</b>{" "}
-              {studentDetails.EnrollmentNo || "N/A"}
-            </p>
-
-            <Button onClick={() => setIsEditing(true)}>
-              Edit Details
-            </Button>
-          </>
-        ) : (
-          <>
             <Form.Group className="mb-3">
-              <Form.Label>Upload Photo</Form.Label>
+              <Form.Label className="fw-bold">📷 Upload Photo</Form.Label>
               <Form.Control
                 type="file"
-                onChange={(e) =>
-                  setEditPhoto(e.target.files[0])
-                }
+                accept="image/*"
+                onChange={(e) => setEditPhoto(e.target.files[0])}
               />
+              <Form.Text className="text-muted">
+                PNG, JPG or GIF (Max 2 MB)
+              </Form.Text>
             </Form.Group>
 
-            <Form.Group className="mb-3">              <Form.Label>Email</Form.Label>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-bold">📧 Email Address</Form.Label>
               <Form.Control
                 type="email"
                 value={editEmail}
-                onChange={(e) =>
-                  setEditEmail(e.target.value)
-                }
+                onChange={(e) => setEditEmail(e.target.value)}
+                placeholder="Enter your email"
               />
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Contact</Form.Label>
+              <Form.Label className="fw-bold">📱 Contact Number</Form.Label>
               <Form.Control
-                type="text"
+                type="tel"
                 value={editContact}
-                onChange={(e) =>
-                  setEditContact(e.target.value)
-                }
+                onChange={(e) => setEditContact(e.target.value)}
+                placeholder="Enter your contact number"
               />
             </Form.Group>
 
             <div className="d-flex gap-2">
-              <Button onClick={handleUpdateDetails}>
-                Save Changes
+              <Button 
+                variant="success"
+                className="flex-grow-1"
+                onClick={handleUpdateDetails}
+              >
+                ✅ Save Changes
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => setIsEditing(false)}
+                className="flex-grow-1"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditPhoto(null);
+                  setEditEmail(studentDetails.email || "");
+                  setEditContact(studentDetails.contact || "");
+                }}
               >
-                Cancel
+                ❌ Cancel
               </Button>
             </div>
           </>

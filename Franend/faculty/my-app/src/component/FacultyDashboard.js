@@ -77,7 +77,7 @@ export default function FacultyDashboard() {
       <Sidebar />
 
       {/* MAIN CONTENT */}
-      <div className="flex-grow-1 p-4 bg-light">
+      <div className="flex-grow-1 p-4 bg-light content-shift">
         <h3 className="mb-4">Faculty Personal Profile</h3>
 
         <div className="card p-4 shadow-sm" style={{ maxWidth: "500px" }}>

@@ -6,7 +6,7 @@ export default function Practical() {
 
     <div className='d-flex'>
       <Sidebar />
-    <div className="w-100 py-4">  {/* 🔥 padding add */}
+    <div className="w-100 py-4 content-shift">  {/* 🔥 padding add */}
       <MarksManager 
         type="practical"
         title="🧪 Practical Marks Manager"        // 🔥 TITLE ADD!

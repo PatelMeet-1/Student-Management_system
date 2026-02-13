@@ -3,7 +3,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import FilterComponent from './Filter'; // 🔥 NEW IMPORT
+import FilterComponent from "./Filter"; // 🔥 NEW IMPORT
 
 export default function FinalResultManager() {
   const RESULTS_API = "http://localhost:3000/api/results";
@@ -13,6 +13,8 @@ export default function FinalResultManager() {
   const [viewResult, setViewResult] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [semesterFilter, setSemesterFilter] = useState("");
+  const [courseFilter, setCourseFilter] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("");
   const [showTopPerformers, setShowTopPerformers] = useState(false);
   const [topLimit, setTopLimit] = useState(10);
   const [showFailedStudents, setShowFailedStudents] = useState(false);
@@ -44,9 +46,12 @@ export default function FinalResultManager() {
         }
         (r.subjects || []).forEach((s) => {
           const subjectWithType = { ...s, type: r.type };
-          if (r.type === "internal") grouped[key].internalSubjects.push(subjectWithType);
-          if (r.type === "practical") grouped[key].practicalSubjects.push(subjectWithType);
-          if (r.type === "university") grouped[key].universitySubjects.push(subjectWithType);
+          if (r.type === "internal")
+            grouped[key].internalSubjects.push(subjectWithType);
+          if (r.type === "practical")
+            grouped[key].practicalSubjects.push(subjectWithType);
+          if (r.type === "university")
+            grouped[key].universitySubjects.push(subjectWithType);
 
           grouped[key].totalMarks += s.marks || 0;
           grouped[key].totalMaxMarks += s.maxMarks || 0;
@@ -72,7 +77,9 @@ export default function FinalResultManager() {
       ...result.practicalSubjects,
       ...result.universitySubjects,
     ];
-    const hasFail = allSubjects.some((s) => ((s.marks || 0) / (s.maxMarks || 1)) * 100 < 33);
+    const hasFail = allSubjects.some(
+      (s) => ((s.marks || 0) / (s.maxMarks || 1)) * 100 < 33,
+    );
     return hasFail ? "❌ FAIL" : "✅ PASS";
   };
 
@@ -83,16 +90,36 @@ export default function FinalResultManager() {
 
   // 🔥 Get all unique semesters
   const getUniqueSemesters = () => {
-    return [...new Set(results.map(r => r.Sem).filter(Boolean))].sort();
+    return [...new Set(results.map((r) => r.Sem).filter(Boolean))].sort();
+  };
+
+  const getUniqueCourses = () => {
+    return [...new Set(results.map((r) => r.course).filter(Boolean))].sort();
+  };
+
+  const getUniqueDepartments = () => {
+    return [
+      ...new Set(results.map((r) => r.department).filter(Boolean)),
+    ].sort();
   };
 
   // ================= FILTER & SEARCH =================
   const filterResults = useCallback(() => {
     let filtered = results;
 
-    // 🔥 SEMESTER FILTER
+    // 🔥 SEMESTER / COURSE / DEPARTMENT FILTER
     if (semesterFilter) {
-      filtered = filtered.filter(r => r.Sem === semesterFilter);
+      filtered = filtered.filter((r) => r.Sem === semesterFilter);
+    }
+    if (courseFilter) {
+      filtered = filtered.filter(
+        (r) => (r.course || "").toString() === courseFilter,
+      );
+    }
+    if (departmentFilter) {
+      filtered = filtered.filter(
+        (r) => (r.department || "").toString() === departmentFilter,
+      );
     }
 
     // 🔥 SEARCH FILTER
@@ -101,8 +128,10 @@ export default function FinalResultManager() {
       filtered = filtered.filter((r) => {
         return (
           (r.Sem && r.Sem.toString().toLowerCase().includes(lowerTerm)) ||
-          (r.student?.EnrollmentNo && r.student.EnrollmentNo.toLowerCase().includes(lowerTerm)) ||
-          (r.student?.name && r.student.name.toLowerCase().includes(lowerTerm)) ||
+          (r.student?.EnrollmentNo &&
+            r.student.EnrollmentNo.toLowerCase().includes(lowerTerm)) ||
+          (r.student?.name &&
+            r.student.name.toLowerCase().includes(lowerTerm)) ||
           (r.course && r.course.toLowerCase().includes(lowerTerm)) ||
           (r.department && r.department.toLowerCase().includes(lowerTerm))
         );
@@ -112,7 +141,7 @@ export default function FinalResultManager() {
     // 🔥 TOP PERFORMERS FILTER - Sort by percentage DESC & take top LIMIT
     if (showTopPerformers) {
       filtered = filtered
-        .filter(r => calculateTableStatus(r) === "✅ PASS")
+        .filter((r) => calculateTableStatus(r) === "✅ PASS")
         .sort((a, b) => getPercentage(b) - getPercentage(a))
         .slice(0, topLimit);
     }
@@ -120,12 +149,21 @@ export default function FinalResultManager() {
     // 🔥 FAILED STUDENTS FILTER
     if (showFailedStudents) {
       filtered = filtered
-        .filter(r => calculateTableStatus(r) === "❌ FAIL")
+        .filter((r) => calculateTableStatus(r) === "❌ FAIL")
         .sort((a, b) => getPercentage(a) - getPercentage(b));
     }
 
     setFilteredResults(filtered);
-  }, [results, searchTerm, semesterFilter, showTopPerformers, showFailedStudents, topLimit]);
+  }, [
+    results,
+    searchTerm,
+    semesterFilter,
+    courseFilter,
+    departmentFilter,
+    showTopPerformers,
+    showFailedStudents,
+    topLimit,
+  ]);
 
   // 🔥 FILTER HANDLERS FOR FilterComponent
   const handleSearch = (e) => {
@@ -135,6 +173,14 @@ export default function FinalResultManager() {
   const handleSemesterFilter = (e) => {
     setSemesterFilter(e.target.value);
   };
+  const handleCourseFilter = (e) => {
+  setCourseFilter(e.target.value);
+};
+
+const handleDepartmentFilter = (e) => {
+  setDepartmentFilter(e.target.value);
+};
+
 
   const handleTopLimitChange = (e) => {
     const value = Number(e.target.value);
@@ -203,18 +249,49 @@ export default function FinalResultManager() {
       return { ...s, percentage: percent.toFixed(2), grade };
     });
 
-    const status = subjectsWithGrades.some((s) => s.percentage < 33) ? "FAIL" : "PASS";
+    const status = subjectsWithGrades.some((s) => s.percentage < 33)
+      ? "FAIL"
+      : "PASS";
 
-    const gradePointMap = { "A+":10, "A":9, "B+":8, "B":7, "C+":6, "C":5, "D":4, "F":0 };
+    const gradePointMap = {
+      "A+": 10,
+      A: 9,
+      "B+": 8,
+      B: 7,
+      "C+": 6,
+      C: 5,
+      D: 4,
+      F: 0,
+    };
     const spi = subjectsWithGrades.length
-      ? (subjectsWithGrades.reduce((sum, s) => sum + gradePointMap[s.grade],0)/subjectsWithGrades.length).toFixed(2)
+      ? (
+          subjectsWithGrades.reduce(
+            (sum, s) => sum + gradePointMap[s.grade],
+            0,
+          ) / subjectsWithGrades.length
+        ).toFixed(2)
       : 0;
 
-    const totalMarks = subjectsWithGrades.reduce((sum, s) => sum + (s.marks || 0),0);
-    const totalMax = subjectsWithGrades.reduce((sum, s) => sum + (s.maxMarks || 100),0);
-    const percentage = totalMax ? ((totalMarks / totalMax) * 100).toFixed(2) : 0;
+    const totalMarks = subjectsWithGrades.reduce(
+      (sum, s) => sum + (s.marks || 0),
+      0,
+    );
+    const totalMax = subjectsWithGrades.reduce(
+      (sum, s) => sum + (s.maxMarks || 100),
+      0,
+    );
+    const percentage = totalMax
+      ? ((totalMarks / totalMax) * 100).toFixed(2)
+      : 0;
 
-    return { subjects: subjectsWithGrades, spi, status, totalMarks, totalMax, percentage };
+    return {
+      subjects: subjectsWithGrades,
+      spi,
+      status,
+      totalMarks,
+      totalMax,
+      percentage,
+    };
   };
 
   const handlePrint = useCallback(() => {
@@ -241,28 +318,36 @@ export default function FinalResultManager() {
       <ToastContainer />
       <h3 className="text-center mb-4 text-primary">🎓 Final Result Manager</h3>
 
-     
-
       {/* RESULTS TABLE */}
-      <div className="card shadow mb-4">
+      <div className="card shadow ">
         <div className="card-header bg-primary text-white p-3">
-         {/* 🔥 FILTER COMPONENT - FULLY REPLACED */}
-      <FilterComponent
-        searchTerm={searchTerm}
-        semesterFilter={semesterFilter}
-        showTopPerformers={showTopPerformers}
-        showFailedStudents={showFailedStudents}
-        topLimit={topLimit}
-        uniqueSemesters={getUniqueSemesters()}
-        filteredCount={filteredResults.length}
-        totalFilteredCount={showTopPerformers ? topLimit : results.length}
-        onSearchChange={handleSearch}
-        onSemesterChange={handleSemesterFilter}
-        onTopLimitChange={handleTopLimitChange}
-        onToggleTopPerformers={toggleTopPerformers}
-        onToggleFailedStudents={toggleFailedStudents}
-        onClearFilters={clearAllFilters}
-      />
+          {/* 🔥 FILTER COMPONENT - FULLY REPLACED */}
+          <FilterComponent
+  searchTerm={searchTerm}
+  semesterFilter={semesterFilter}
+  courseFilter={courseFilter}
+  departmentFilter={departmentFilter}
+  showTopPerformers={showTopPerformers}
+  showFailedStudents={showFailedStudents}
+  topLimit={topLimit}
+
+  uniqueSemesters={getUniqueSemesters()}
+  uniqueCourses={getUniqueCourses()}
+  uniqueDepartments={getUniqueDepartments()}
+
+  filteredCount={filteredResults.length}
+  totalFilteredCount={results.length}
+
+  onSearchChange={handleSearch}
+  onSemesterChange={handleSemesterFilter}
+  onCourseChange={handleCourseFilter}
+  onDepartmentChange={handleDepartmentFilter}
+  onTopLimitChange={handleTopLimitChange}
+  onToggleTopPerformers={toggleTopPerformers}
+  onToggleFailedStudents={toggleFailedStudents}
+  onClearFilters={clearAllFilters}
+/>
+
         </div>
 
         <div className="table-responsive">
@@ -284,15 +369,24 @@ export default function FinalResultManager() {
               {filteredResults.length === 0 ? (
                 <tr>
                   <td colSpan="9" className="text-center py-4 text-muted">
-                    {searchTerm || semesterFilter || showTopPerformers || showFailedStudents 
-                      ? `❌ No results found` 
-                      : "📭 No results found"
-                    }
+                    {searchTerm ||
+                    semesterFilter ||
+                    showTopPerformers ||
+                    showFailedStudents
+                      ? `❌ No results found`
+                      : "📭 No results found"}
                   </td>
                 </tr>
               ) : (
                 filteredResults.map((r, i) => (
-                  <tr key={r._id} className={calculateTableStatus(r) === "❌ FAIL" ? "table-danger" : ""}>
+                  <tr
+                    key={r._id}
+                    className={
+                      calculateTableStatus(r) === "❌ FAIL"
+                        ? "table-danger"
+                        : ""
+                    }
+                  >
                     <td>{i + 1}</td>
                     <td>{r.student?.name}</td>
                     <td>{r.student?.EnrollmentNo}</td>
@@ -300,7 +394,15 @@ export default function FinalResultManager() {
                     <td>{r.course}</td>
                     <td>{r.department}</td>
                     <td>
-                      <strong className={getPercentage(r) >= 70 ? "text-success" : getPercentage(r) >= 50 ? "text-warning" : "text-danger"}>
+                      <strong
+                        className={
+                          getPercentage(r) >= 70
+                            ? "text-success"
+                            : getPercentage(r) >= 50
+                              ? "text-warning"
+                              : "text-danger"
+                        }
+                      >
                         {getPercentage(r).toFixed(1)}%
                       </strong>
                     </td>
@@ -316,7 +418,10 @@ export default function FinalResultManager() {
                       </span>
                     </td>
                     <td>
-                      <button className="btn btn-success btn-sm" onClick={() => setViewResult(r)}>
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() => setViewResult(r)}
+                      >
                         👁️ View
                       </button>
                     </td>
@@ -333,25 +438,35 @@ export default function FinalResultManager() {
         <div ref={printRef} className="print-section">
           <style jsx>{`
             @media print {
-              body * { visibility: hidden; }
-              .print-section, .print-section * { visibility: visible; }
-              .print-section { 
-                position: absolute; 
-                left: 0; 
-                top: 0; 
-                width: 100%; 
+              body * {
+                visibility: hidden;
+              }
+              .print-section,
+              .print-section * {
+                visibility: visible;
+              }
+              .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
                 background: white !important;
               }
-              .no-print { display: none !important; }
-              .card { box-shadow: none !important; border: 2px solid #28a745 !important; }
+              .no-print {
+                display: none !important;
+              }
+              .card {
+                box-shadow: none !important;
+                border: 2px solid #28a745 !important;
+              }
             }
           `}</style>
 
           <div className="card mt-4 border-success shadow-lg p-4 position-relative no-print-on-top">
-            <button 
+            <button
               className="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-3 z-3 no-print"
               onClick={closeResult}
-              style={{ borderRadius: '50%', width: '40px', height: '30px' }}
+              style={{ borderRadius: "50%", width: "40px", height: "30px" }}
             >
               ✕
             </button>
@@ -365,8 +480,13 @@ export default function FinalResultManager() {
           <div className="card border-success shadow-lg p-4 print-card">
             <div className="text-center mb-4">
               <h3>🏆 SEMESTER RESULT - {viewResult.Sem}</h3>
-              <h5>{viewResult.student?.name} | {viewResult.course} | {viewResult.department}</h5>
-              <small className="text-muted">Enrollment: {viewResult.student?.EnrollmentNo}</small>
+              <h5>
+                {viewResult.student?.name} | {viewResult.course} |{" "}
+                {viewResult.department}
+              </h5>
+              <small className="text-muted">
+                Enrollment: {viewResult.student?.EnrollmentNo}
+              </small>
             </div>
 
             {(() => {
@@ -375,7 +495,9 @@ export default function FinalResultManager() {
                 <div className="row mb-4 p-3 bg-light rounded">
                   <div className="col-md-3">
                     <h6>Total Marks</h6>
-                    <h4>{calc.totalMarks}/{calc.totalMax}</h4>
+                    <h4>
+                      {calc.totalMarks}/{calc.totalMax}
+                    </h4>
                   </div>
                   <div className="col-md-3">
                     <h6>Percentage</h6>
@@ -383,24 +505,40 @@ export default function FinalResultManager() {
                   </div>
                   <div className="col-md-3">
                     <h6>SPI</h6>
-                    <h4 className={calc.status==='PASS'?'text-success':'text-danger'}>{calc.spi}</h4>
+                    <h4
+                      className={
+                        calc.status === "PASS" ? "text-success" : "text-danger"
+                      }
+                    >
+                      {calc.spi}
+                    </h4>
                   </div>
                   <div className="col-md-3">
                     <h6>Status</h6>
-                    <span className={`badge w-100 p-2 ${calc.status==='PASS'?'bg-success':'bg-danger'}`}>{calc.status}</span>
+                    <span
+                      className={`badge w-100 p-2 ${calc.status === "PASS" ? "bg-success" : "bg-danger"}`}
+                    >
+                      {calc.status}
+                    </span>
                   </div>
                 </div>
-              )
+              );
             })()}
 
-            {["internalSubjects","practicalSubjects","universitySubjects"].map((key) => {
+            {[
+              "internalSubjects",
+              "practicalSubjects",
+              "universitySubjects",
+            ].map((key) => {
               const subjects = viewResult[key] || [];
               if (!subjects.length) return null;
               const calc = calculateResult(viewResult);
 
               return (
                 <div key={key} className="mb-4">
-                  <h5 className="text-uppercase border-bottom pb-2">{key.replace("Subjects","")}</h5>
+                  <h5 className="text-uppercase border-bottom pb-2">
+                    {key.replace("Subjects", "")}
+                  </h5>
                   <div className="table-responsive">
                     <table className="table table-sm table-bordered">
                       <thead className="table-dark">
@@ -414,9 +552,18 @@ export default function FinalResultManager() {
                       </thead>
                       <tbody>
                         {calc.subjects
-                          .filter(s => s.type === key.replace("Subjects","").toLowerCase())
-                          .map((s,i)=>(
-                            <tr key={i} className={s.percentage<33?"table-danger":""}>
+                          .filter(
+                            (s) =>
+                              s.type ===
+                              key.replace("Subjects", "").toLowerCase(),
+                          )
+                          .map((s, i) => (
+                            <tr
+                              key={i}
+                              className={
+                                s.percentage < 33 ? "table-danger" : ""
+                              }
+                            >
                               <td>{s.name}</td>
                               <td>{s.maxMarks}</td>
                               <td>{s.marks}</td>
@@ -428,14 +575,19 @@ export default function FinalResultManager() {
                     </table>
                   </div>
                 </div>
-              )
+              );
             })}
 
             <div className="mt-4 p-3 bg-success bg-gradient rounded text-center text-white">
-              <h4>{calculateResult(viewResult).status==='PASS'?'🎉 PASS':'⚠️ FAIL'}</h4>
+              <h4>
+                {calculateResult(viewResult).status === "PASS"
+                  ? "🎉 PASS"
+                  : "⚠️ FAIL"}
+              </h4>
               <p className="mb-0 fs-6">
-                SPI: <strong>{calculateResult(viewResult).spi}</strong> | 
-                Percentage: <strong>{calculateResult(viewResult).percentage}%</strong>
+                SPI: <strong>{calculateResult(viewResult).spi}</strong> |
+                Percentage:{" "}
+                <strong>{calculateResult(viewResult).percentage}%</strong>
               </p>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Layout from "../layout/Layout";
+import CourseSemesterPage from "../CourseSemPage.js/CourseSemesterPage"; 
 import Registration from "../students/Registration";
 import Circular from "../circular/Circular";
 import Timetable from "../timetable/Timetable";
@@ -8,9 +9,7 @@ import Faculty from "../faculty/faculty";
 import InternalMarks from "../Internalmarks result/Internal";
 import PracticalMarks from "../practicalmarkResult/Practical";
 import Finalresult from "../Final result/Finalresult";
-import CourseSemesterPage from "../CourseSemPage.js/CourseSemesterPage"; 
 import Totalmarks from "../SemesterWiseTotalMarks/SemesterWiseTotalMarks";
-import FinalCertificate from "../Finalcertificate/Finalcertificate";
 
 
 export default function Main() {
@@ -18,6 +17,7 @@ export default function Main() {
 
   return (
     <Layout active={active} setActive={setActive}>
+      {active === "course" && <CourseSemesterPage />}
       {active === "students" && <Registration />}
       {active === "circular" && <Circular />}
       {active === "timetable" && <Timetable />}
@@ -26,9 +26,8 @@ export default function Main() {
       {active === "internal" && <InternalMarks />}
       {active === "practical" && <PracticalMarks />}
       {active === "final" && <Finalresult />}
-      {active === "course" && <CourseSemesterPage />}
       {active === "marks" && <Totalmarks />}
-      {active === "finalcertificate" && <FinalCertificate />}
+   
     </Layout>
   );
 }

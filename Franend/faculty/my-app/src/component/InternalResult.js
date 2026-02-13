@@ -5,7 +5,7 @@ export default function Internal() {
   return (
     <div className="d-flex">  {/* 🔥 Flex container for sidebar and content */}
     <Sidebar />
-    <div className="w-100 py-4">  {/* 🔥 Full width and padding */}
+    <div className="w-100 py-4 content-shift">  {/* 🔥 Full width and padding */}
       <MarksManager 
         type="internal"
         title="📝 Internal Marks Manager"           // ✅ Title fixed

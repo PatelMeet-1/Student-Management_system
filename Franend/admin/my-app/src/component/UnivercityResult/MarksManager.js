@@ -33,6 +33,8 @@ export default function MarksManager({
   // 🔥 NEW FILTER STATES FOR FilterComponent
   const [searchTerm, setSearchTerm] = useState("");
   const [semesterFilter, setSemesterFilter] = useState("");
+  const [courseFilter, setCourseFilter] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("");
   const [showTopPerformers, setShowTopPerformers] = useState(false);
   const [topLimit, setTopLimit] = useState(10);
   const [showFailedStudents, setShowFailedStudents] = useState(false);
@@ -44,9 +46,17 @@ export default function MarksManager({
   const [loading, setLoading] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // 🔥 Get unique semesters
+  // 🔥 Get unique semesters / courses / departments
   const getUniqueSemesters = () => {
     return [...new Set(results.map(r => r.Sem).filter(Boolean))].sort();
+  };
+
+  const getUniqueCourses = () => {
+    return [...new Set(results.map(r => r.course).filter(Boolean))].sort();
+  };
+
+  const getUniqueDepartments = () => {
+    return [...new Set(results.map(r => r.department).filter(Boolean))].sort();
   };
 
   // 🔥 HELPER FUNCTIONS FOR FILTERING
@@ -73,9 +83,15 @@ export default function MarksManager({
   const filterResults = useCallback(() => {
     let filtered = results;
     
-    // 🔥 SEMESTER FILTER
+    // 🔥 SEMESTER / COURSE / DEPARTMENT FILTER
     if (semesterFilter) {
       filtered = filtered.filter(r => r.Sem === semesterFilter);
+    }
+    if (courseFilter) {
+      filtered = filtered.filter(r => (r.course || "").toString() === courseFilter);
+    }
+    if (departmentFilter) {
+      filtered = filtered.filter(r => (r.department || "").toString() === departmentFilter);
     }
 
     // 🔥 SEARCH FILTER
@@ -110,7 +126,7 @@ export default function MarksManager({
     }
 
     setFilteredResults(filtered);
-  }, [results, searchTerm, semesterFilter, showTopPerformers, showFailedStudents, topLimit, refreshTrigger]);
+  }, [results, searchTerm, semesterFilter, courseFilter, departmentFilter, showTopPerformers, showFailedStudents, topLimit, refreshTrigger]);
 
   useEffect(() => {
     filterResults();
@@ -119,6 +135,8 @@ export default function MarksManager({
   // 🔥 FILTER HANDLERS FOR FilterComponent
   const handleSearch = (e) => setSearchTerm(e.target.value);
   const handleSemesterFilter = (e) => setSemesterFilter(e.target.value);
+  const handleCourseFilter = (e) => setCourseFilter(e.target.value);
+  const handleDepartmentFilter = (e) => setDepartmentFilter(e.target.value);
   const handleTopLimitChange = (e) => {
     const value = Number(e.target.value);
     if (value > 0 && value <= 100) setTopLimit(value);
@@ -129,6 +147,8 @@ export default function MarksManager({
       setShowFailedStudents(false);
       setSearchTerm("");
       setSemesterFilter("");
+      setCourseFilter("");
+      setDepartmentFilter("");
     }
   };
   const toggleFailedStudents = () => {
@@ -137,11 +157,15 @@ export default function MarksManager({
       setShowTopPerformers(false);
       setSearchTerm("");
       setSemesterFilter("");
+      setCourseFilter("");
+      setDepartmentFilter("");
     }
   };
   const clearAllFilters = () => {
     setSearchTerm("");
     setSemesterFilter("");
+    setCourseFilter("");
+    setDepartmentFilter("");
     setShowTopPerformers(false);
     setShowFailedStudents(false);
     setTopLimit(10);
@@ -657,24 +681,35 @@ export default function MarksManager({
 
       {/* RESULTS TABLE - SIMPLIFIED HEADER */}
       <div className="card shadow">
-        <div className="card-header bg-primary text-white p-3">
+        <div className="card-header bg-primary text-white">
+    
          {/* 🔥 FILTER COMPONENT - FULLY REPLACED */}
-      <FilterComponent
-        searchTerm={searchTerm}
-        semesterFilter={semesterFilter}
-        showTopPerformers={showTopPerformers}
-        showFailedStudents={showFailedStudents}
-        topLimit={topLimit}
-        uniqueSemesters={getUniqueSemesters()}
-        filteredCount={filteredResults.length}
-        totalFilteredCount={results.length}
-        onSearchChange={handleSearch}
-        onSemesterChange={handleSemesterFilter}
-        onTopLimitChange={handleTopLimitChange}
-        onToggleTopPerformers={toggleTopPerformers}
-        onToggleFailedStudents={toggleFailedStudents}
-        onClearFilters={clearAllFilters}
-      />
+     <FilterComponent
+  searchTerm={searchTerm}
+  semesterFilter={semesterFilter}
+  courseFilter={courseFilter}
+  departmentFilter={departmentFilter}
+  showTopPerformers={showTopPerformers}
+  showFailedStudents={showFailedStudents}
+  topLimit={topLimit}
+
+  uniqueSemesters={getUniqueSemesters()}
+  uniqueCourses={getUniqueCourses()}
+  uniqueDepartments={getUniqueDepartments()}
+
+  filteredCount={filteredResults.length}
+  totalFilteredCount={results.length}
+
+  onSearchChange={handleSearch}
+  onSemesterChange={handleSemesterFilter}
+  onCourseChange={handleCourseFilter}
+  onDepartmentChange={handleDepartmentFilter}
+  onTopLimitChange={handleTopLimitChange}
+  onToggleTopPerformers={toggleTopPerformers}
+  onToggleFailedStudents={toggleFailedStudents}
+  onClearFilters={clearAllFilters}
+/>
+
         </div>
 
         <div className="table-responsive">
@@ -774,22 +809,8 @@ export default function MarksManager({
           <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5>
               📄 {viewResult.enrollmentNo} - {viewResult.Sem}
-              <span
-                className={`ms-3 badge fs-6 px-3 py-2 ${
-                  calculateStatus(editingSubjects) === "✅ PASS"
-                    ? "bg-success"
-                    : "bg-danger"
-                }`}
-              >
-                {calculateStatus(editingSubjects)}
-              </span>
-              <span
-                className={`ms-2 badge fs-6 px-3 py-2 ${
-                  viewResult.published ? "bg-success" : "bg-warning text-dark"
-                }`}
-              >
-                {viewResult.published ? "✅ Published" : "⏳ Draft"}
-              </span>
+              
+              
             </h5>
             <div>
               {editMode && (
@@ -800,13 +821,7 @@ export default function MarksManager({
                   💾 Save
                 </button>
               )}
-              <button
-                className="btn btn-secondary btn-sm me-2"
-                onClick={() => togglePublish(viewResult._id)}
-                disabled={loading}
-              >
-                {viewResult.published ? "📤 Unpublish" : "📤 Publish"}
-              </button>
+              
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => {
