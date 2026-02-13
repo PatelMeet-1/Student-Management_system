@@ -1,150 +1,128 @@
 import React from "react";
 
 const FilterComponent = ({
-  // Filter states
   searchTerm,
   semesterFilter,
+  courseFilter,
+  departmentFilter,
   showTopPerformers,
   showFailedStudents,
   topLimit,
-  
-  // Filter handlers
+
   onSearchChange,
   onSemesterChange,
+  onCourseChange,
+  onDepartmentChange,
   onTopLimitChange,
   onToggleTopPerformers,
   onToggleFailedStudents,
   onClearFilters,
-  
-  // Data for semesters
+
   uniqueSemesters = [],
-  
-  // Status info
+  uniqueCourses = [],
+  uniqueDepartments = [],
+
   filteredCount = 0,
   totalFilteredCount = 0,
   topLimitMax = 100,
-  
-  // Styling props
   className = ""
 }) => {
-  
   return (
-    <div className={`filter-container p-3 ${className}`}>
-      <div className="row align-items-end g-3">
-        
-        {/* 🔥 TOP PERFORMERS */}
-        <div className="col-md-3 col-sm-6">
-          <label className="form-label fw-bold small mb-1">🏆 Top Performers</label>
-          <div className="row g-1">
-            <div className="col-8 pe-0">
-              <div className="form-check form-check-sm">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="topPerformers"
-                  checked={showTopPerformers}
-                  onChange={(e) => {
-                    if (e.target.checked && showFailedStudents) {
-                      onToggleFailedStudents(); // ❌ Uncheck Failed first
-                    }
-                    onToggleTopPerformers(e); // ✅ Then toggle Top
-                  }}
-                />
-                <label className="form-check-label small" htmlFor="topPerformers">
-                  Show Top
-                </label>
-              </div>
-            </div>
-            <div className="col-4 ps-1">
-              {showTopPerformers && (
-                <input
-                  type="number"
-                  className="form-control form-control-sm"
-                  placeholder="10"
-                  min="1"
-                  max={topLimitMax}
-                  value={topLimit || ''}
-                  onChange={(e) => onTopLimitChange(e.target.value)}
-                  style={{ width: '70px' }}
-                />
-              )}
-            </div>
-          </div>
-        </div>
+    <div className={`card-body ${className}`}>
+<div className="row g-2 align-items-end flex-wrap flex-md-nowrap">
 
-        {/* 🔥 FAILED STUDENTS */}
-        <div className="col-md-2 col-sm-6">
-          <label className="form-label fw-bold small mb-1">❌ Failed</label>
-          <div className="form-check form-check-sm mt-1">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="failedStudents"
-              checked={showFailedStudents}
-              onChange={(e) => {
-                if (e.target.checked && showTopPerformers) {
-                  onToggleTopPerformers(); // ❌ Uncheck Top first
-                }
-                onToggleFailedStudents(e); // ✅ Then toggle Failed
-              }}
-            />
-            <label className="form-check-label small" htmlFor="failedStudents">
-              Show FAIL list
-            </label>
-          </div>
-        </div>
-
-        {/* 📅 SEMESTER */}
-        <div className="col-md-2 col-sm-6">
-          <label className="form-label fw-bold small mb-1">📅 Semester</label>
-          <select
-            className="form-select form-select-sm"
-            value={semesterFilter}
-            onChange={(e) => onSemesterChange(e.target.value)}
-          >
-            <option value="">All Semesters</option>
-            {uniqueSemesters.map(sem => (
-              <option key={sem} value={sem}>{sem}</option>
-            ))}
-          </select>
-        </div>
-        
-        {/* 🔍 SEARCH */}
-        <div className="col-md-3 col-sm-12">
-          <label className="form-label fw-bold small mb-1">🔍 Search</label>
-          <input
-            type="text"
-            className="form-control form-control-sm"
-            placeholder="Name, Enrollment, Course, Sem, Dept..."
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-        </div>
-        
-        {/* 🧹 CLEAR */}
-        <div className="col-md-2 col-sm-6">
-          <label className="form-label fw-bold small mb-1 d-none d-md-block">&nbsp;</label>
-          <button
-            className="btn btn-outline-light btn-sm w-100"
-            onClick={onClearFilters}
-          >
-            🧹 Clear All
-          </button>
-        </div>
+    {/* 🏆 TOP */}
+    <div className="col-auto">
+      <label className="form-label fw-bold small">🏆 Top</label>
+      <div className="d-flex align-items-center gap-2">
+        <input
+          type="checkbox"
+          className="form-check-input mt-0"
+          checked={showTopPerformers}
+          onChange={onToggleTopPerformers}
+        />
+        <input
+          type="number"
+          className="form-control form-control-sm"
+          style={{ width: "70px" }}
+          min="1"
+          max={topLimitMax}
+          disabled={!showTopPerformers}
+          value={topLimit}
+          onChange={onTopLimitChange}
+        />
       </div>
-      
-      {/* Count Info */}
-      {filteredCount !== undefined && totalFilteredCount !== undefined && (
-        <div className="row mt-2">
-          <div className="col-12">
-            <small className="text-light">
-              Showing: <strong>{filteredCount}</strong> of <strong>{totalFilteredCount}</strong> 
-              results
-            </small>
-          </div>
-        </div>
-      )}
     </div>
+
+    {/* ❌ FAIL */}
+    <div className="col-auto">
+      <input
+        className="form-check-input ms-2"
+        type="checkbox"
+        checked={showFailedStudents}
+        onChange={onToggleFailedStudents}
+      />
+      <label className="form-label fw-bold small">❌ Fail</label>
+    </div>
+
+    {/* 📚 COURSE */}
+    <div className="col-auto">
+      <label className="form-label fw-bold small">📚 Course</label>
+      <select className="form-select form-select-sm" value={courseFilter} onChange={onCourseChange}>
+        <option value="">All</option>
+        {uniqueCourses.map(c => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+    </div>
+
+    {/* 🏢 DEPARTMENT */}
+    <div className="col-auto">
+      <label className="form-label fw-bold small">🏢 Dept</label>
+      <select className="form-select form-select-sm" value={departmentFilter} onChange={onDepartmentChange}>
+        <option value="">All</option>
+        {uniqueDepartments.map(d => (
+          <option key={d} value={d}>{d}</option>
+        ))}
+      </select>
+    </div>
+
+    {/* 📅 SEMESTER */}
+    <div className="col-auto">
+      <label className="form-label fw-bold small">📅 Sem</label>
+      <select className="form-select form-select-sm" value={semesterFilter} onChange={onSemesterChange}>
+        <option value="">All</option>
+        {uniqueSemesters.map(sem => (
+          <option key={sem} value={sem}>{sem}</option>
+        ))}
+      </select>
+    </div>
+
+    {/* 🔍 SEARCH */}
+    <div className="col-auto">
+      <label className="form-label fw-bold small">🔍 Search</label>
+      <input
+        type="text"
+        className="form-control form-control-sm"
+        style={{ width: "220px" }}
+        placeholder="Search..."
+        value={searchTerm}
+        onChange={onSearchChange}
+      />
+    </div>
+
+    {/* 🧹 CLEAR */}
+    <div className="col-auto">
+      <button className="btn  btn-sm mt-4 bg-white" onClick={onClearFilters}>
+        🧹 Clear
+      </button>
+    </div>
+
+  </div>
+
+
+</div>
+
   );
 };
 

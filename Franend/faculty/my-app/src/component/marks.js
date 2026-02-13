@@ -4,12 +4,13 @@ import * as XLSX from "xlsx";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import FilterComponent from "./filter";  // ✅ FilterComponent import
+import FilterComponent from '../component/filter'; // 🔥 NEW IMPORT
 
+// 🔥 REUSABLE MARKS MANAGER COMPONENT
 export default function MarksManager({
   type, // "university" | "practical" | "internal"
   title,
-  apiBase,
+  apiBase, // e.g., "/api/results", "/api/practical", "/api/internal"
   usersApi = "/api/users",
   coursesApi = "/api/courses",
   examTypeLabel = "Exam Type"
@@ -22,11 +23,22 @@ export default function MarksManager({
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
   const [results, setResults] = useState([]);
+  const [filteredResults, setFilteredResults] = useState([]);
   const [excelRows, setExcelRows] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
+  
+  // 🔥 NEW FILTER STATES FOR FilterComponent
+  const [searchTerm, setSearchTerm] = useState("");
+  const [semesterFilter, setSemesterFilter] = useState("");
+  const [courseFilter, setCourseFilter] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("");
+  const [showTopPerformers, setShowTopPerformers] = useState(false);
+  const [topLimit, setTopLimit] = useState(10);
+  const [showFailedStudents, setShowFailedStudents] = useState(false);
+  
   const [viewResult, setViewResult] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [editingSubjects, setEditingSubjects] = useState([]);
@@ -34,73 +46,130 @@ export default function MarksManager({
   const [loading, setLoading] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // 🔥 FILTER STATES ✅
-  const [searchTerm, setSearchTerm] = useState("");
-  const [semesterFilter, setSemesterFilter] = useState("");
-  const [showTopPerformers, setShowTopPerformers] = useState(false);
-  const [showFailedStudents, setShowFailedStudents] = useState(false);
-  const [topLimit, setTopLimit] = useState(10);
+  // 🔥 Get unique semesters / courses / departments
+  const getUniqueSemesters = () => {
+    return [...new Set(results.map(r => r.Sem).filter(Boolean))].sort();
+  };
 
-  // ---------------- FILTER FUNCTIONS ✅
-  const getUniqueSemesters = useCallback(() => {
-    return Array.from(new Set(results.map(r => r.Sem).filter(Boolean))).sort();
-  }, [results]);
+  const getUniqueCourses = () => {
+    return [...new Set(results.map(r => r.course).filter(Boolean))].sort();
+  };
 
-  const filteredResults = useCallback(() => {
-    let filtered = results;
+  const getUniqueDepartments = () => {
+    return [...new Set(results.map(r => r.department).filter(Boolean))].sort();
+  };
 
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(r =>
-        r.enrollmentNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.course.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.Sem.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  // 🔥 HELPER FUNCTIONS FOR FILTERING
+  const calculateStatus = (subjects) => {
+    if (!subjects?.length) return "No Subjects";
+    const hasFail = subjects.some(
+      (s) => ((s.marks || 0) / (s.maxMarks || 1)) * 100 < 33
+    );
+    return hasFail ? "❌ FAIL" : "✅ PASS";
+  };
 
-    // Semester filter
-    if (semesterFilter) {
-      filtered = filtered.filter(r => r.Sem === semesterFilter);
-    }
-
-    // Top performers filter
-    if (showTopPerformers) {
-      filtered = filtered
-        .map(r => ({
-          ...r,
-          avgMarks: r.subjects?.reduce((sum, s) => sum + (s.marks || 0), 0) / (r.subjects?.length || 1)
-        }))
-        .sort((a, b) => (b.avgMarks || 0) - (a.avgMarks || 0))
-        .slice(0, topLimit);
-    }
-
-    // Failed students filter
-    if (showFailedStudents) {
-      filtered = filtered.filter(r => calculateStatus(r.subjects) === "❌ FAIL");
-    }
-
-    return filtered;
-  }, [results, searchTerm, semesterFilter, showTopPerformers, showFailedStudents, topLimit]);
-
-  // Filter handlers ✅
-  const handleSearch = (term) => setSearchTerm(term);
-  const handleSemesterFilter = (sem) => setSemesterFilter(sem);
-  const handleTopLimitChange = (limit) => setTopLimit(Number(limit) || 10);
-  const toggleTopPerformers = () => setShowTopPerformers(!showTopPerformers);
-  const toggleFailedStudents = () => setShowFailedStudents(!showFailedStudents);
-  const clearAllFilters = () => {
-    setSearchTerm("");
-    setSemesterFilter("");
-    setShowTopPerformers(false);
-    setShowFailedStudents(false);
-    setTopLimit(10);
+  const getPercentage = (result) => {
+    const totalMarks = result.subjects?.reduce((sum, s) => sum + (s.marks || 0), 0) || 0;
+    const totalMax = result.subjects?.reduce((sum, s) => sum + (s.maxMarks || 100), 0) || 100;
+    return totalMax ? (totalMarks / totalMax) * 100 : 0;
   };
 
   // ---------------- INITIAL LOAD ----------------
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  // 🔥 POWERFUL FILTER LOGIC
+  const filterResults = useCallback(() => {
+    let filtered = results;
+    
+    // 🔥 SEMESTER / COURSE / DEPARTMENT FILTER
+    if (semesterFilter) {
+      filtered = filtered.filter(r => r.Sem === semesterFilter);
+    }
+    if (courseFilter) {
+      filtered = filtered.filter(r => (r.course || "").toString() === courseFilter);
+    }
+    if (departmentFilter) {
+      filtered = filtered.filter(r => (r.department || "").toString() === departmentFilter);
+    }
+
+    // 🔥 SEARCH FILTER
+    if (searchTerm.trim()) {
+      const query = searchTerm.toLowerCase().trim();
+      filtered = filtered.filter((r) => {
+        const enrollmentMatch = r.enrollmentNo && 
+          r.enrollmentNo.toLowerCase().includes(query);
+        const courseMatch = r.course && 
+          r.course.toLowerCase().includes(query);
+        const departmentMatch = r.department && 
+          r.department.toLowerCase().includes(query);
+        const semMatch = r.Sem && 
+          r.Sem.toLowerCase().includes(query);
+        return enrollmentMatch || courseMatch || departmentMatch || semMatch;
+      });
+    }
+
+    // 🔥 TOP PERFORMERS FILTER
+    if (showTopPerformers) {
+      filtered = filtered
+        .filter(r => calculateStatus(r.subjects) === "✅ PASS")
+        .sort((a, b) => getPercentage(b) - getPercentage(a))
+        .slice(0, topLimit);
+    }
+
+    // 🔥 FAILED STUDENTS FILTER
+    if (showFailedStudents) {
+      filtered = filtered
+        .filter(r => calculateStatus(r.subjects) === "❌ FAIL")
+        .sort((a, b) => getPercentage(a) - getPercentage(b));
+    }
+
+    setFilteredResults(filtered);
+  }, [results, searchTerm, semesterFilter, courseFilter, departmentFilter, showTopPerformers, showFailedStudents, topLimit, refreshTrigger]);
+
+  useEffect(() => {
+    filterResults();
+  }, [filterResults]);
+
+  // 🔥 FILTER HANDLERS FOR FilterComponent
+  const handleSearch = (e) => setSearchTerm(e.target.value);
+  const handleSemesterFilter = (e) => setSemesterFilter(e.target.value);
+  const handleCourseFilter = (e) => setCourseFilter(e.target.value);
+  const handleDepartmentFilter = (e) => setDepartmentFilter(e.target.value);
+  const handleTopLimitChange = (e) => {
+    const value = Number(e.target.value);
+    if (value > 0 && value <= 100) setTopLimit(value);
+  };
+  const toggleTopPerformers = () => {
+    setShowTopPerformers(!showTopPerformers);
+    if (!showTopPerformers) {
+      setShowFailedStudents(false);
+      setSearchTerm("");
+      setSemesterFilter("");
+      setCourseFilter("");
+      setDepartmentFilter("");
+    }
+  };
+  const toggleFailedStudents = () => {
+    setShowFailedStudents(!showFailedStudents);
+    if (!showFailedStudents) {
+      setShowTopPerformers(false);
+      setSearchTerm("");
+      setSemesterFilter("");
+      setCourseFilter("");
+      setDepartmentFilter("");
+    }
+  };
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setSemesterFilter("");
+    setCourseFilter("");
+    setDepartmentFilter("");
+    setShowTopPerformers(false);
+    setShowFailedStudents(false);
+    setTopLimit(10);
+  };
 
   // ---------------- LOAD DATA ----------------
   const loadInitialData = async () => {
@@ -162,7 +231,7 @@ export default function MarksManager({
     }
   };
 
-  // 🔥 PUBLISH/UNPUBLISH
+  // 🔥 PUBLISH/UNPUBLISH FUNCTION
   const togglePublish = async (resultId) => {
     try {
       setLoading(true);
@@ -209,15 +278,7 @@ export default function MarksManager({
     setSubjects([]);
   }, [selectedCourse, selectedDepartment, selectedSemester, courses, type]);
 
-  const calculateStatus = (subjects) => {
-    if (!subjects?.length) return "No Subjects";
-    const hasFail = subjects.some(
-      (s) => ((s.marks || 0) / (s.maxMarks || 1)) * 100 < 33
-    );
-    return hasFail ? "❌ FAIL" : "✅ PASS";
-  };
-
-  // MARKS VALIDATION
+  // ✅ MARKS VALIDATION FUNCTION
   const validateMarks = (marks, maxMarks) => {
     const numMarks = Number(marks);
     if (isNaN(numMarks) || numMarks < 0) {
@@ -255,6 +316,7 @@ export default function MarksManager({
     reader.readAsArrayBuffer(file);
   };
 
+  // ✅ VALIDATED EXCEL SUBMIT
   const submitExcel = async () => {
     if (!excelRows.length) return toast.error("No rows to upload");
     if (!selectedCourse || !selectedDepartment || !selectedSemester) {
@@ -296,6 +358,7 @@ export default function MarksManager({
             continue;
           }
 
+          // ✅ COURSE/DEPT VERIFICATION
           const studentCourse = String(
             student.course || student.Course || ""
           ).trim();
@@ -313,6 +376,7 @@ export default function MarksManager({
             continue;
           }
 
+          // ✅ MARKS VALIDATION FOR ALL SUBJECTS
           const subjectsData = subjects.map((sub, idx) => {
             const marks = Number(row[idx + 4]) || 0;
             const validation = validateMarks(marks, sub.maxMarks);
@@ -613,25 +677,39 @@ export default function MarksManager({
         )}
       </div>
 
-      {/* 🔥 FILTER COMPONENT - FULLY INTEGRATED ✅ */}
+      
+
+      {/* RESULTS TABLE - SIMPLIFIED HEADER */}
       <div className="card shadow">
-        <div className="card-header bg-primary text-white p-3">
-          <FilterComponent
-            searchTerm={searchTerm}
-            semesterFilter={semesterFilter}
-            showTopPerformers={showTopPerformers}
-            showFailedStudents={showFailedStudents}
-            topLimit={topLimit}
-            uniqueSemesters={getUniqueSemesters()}
-            filteredCount={filteredResults().length}
-            totalFilteredCount={results.length}
-            onSearchChange={handleSearch}
-            onSemesterChange={handleSemesterFilter}
-            onTopLimitChange={handleTopLimitChange}
-            onToggleTopPerformers={toggleTopPerformers}
-            onToggleFailedStudents={toggleFailedStudents}
-            onClearFilters={clearAllFilters}
-          />
+        <div className="card-header bg-primary text-white">
+    
+         {/* 🔥 FILTER COMPONENT - FULLY REPLACED */}
+     <FilterComponent
+  searchTerm={searchTerm}
+  semesterFilter={semesterFilter}
+  courseFilter={courseFilter}
+  departmentFilter={departmentFilter}
+  showTopPerformers={showTopPerformers}
+  showFailedStudents={showFailedStudents}
+  topLimit={topLimit}
+
+  uniqueSemesters={getUniqueSemesters()}
+  uniqueCourses={getUniqueCourses()}
+  uniqueDepartments={getUniqueDepartments()}
+
+  filteredCount={filteredResults.length}
+  totalFilteredCount={results.length}
+
+  onSearchChange={handleSearch}
+  onSemesterChange={handleSemesterFilter}
+  onCourseChange={handleCourseFilter}
+  onDepartmentChange={handleDepartmentFilter}
+  onTopLimitChange={handleTopLimitChange}
+  onToggleTopPerformers={toggleTopPerformers}
+  onToggleFailedStudents={toggleFailedStudents}
+  onClearFilters={clearAllFilters}
+/>
+
         </div>
 
         <div className="table-responsive">
@@ -650,14 +728,16 @@ export default function MarksManager({
               </tr>
             </thead>
             <tbody>
-              {filteredResults().length === 0 ? (
+              {filteredResults.length === 0 ? (
                 <tr>
                   <td colSpan="9" className="text-center py-4 text-muted">
-                    📭 No results found{searchTerm && ' for your search'}
+                    {searchTerm || semesterFilter || showTopPerformers || showFailedStudents
+                      ? `❌ No results found`
+                      : "📭 No results found"}
                   </td>
                 </tr>
               ) : (
-                filteredResults().map((r, i) => (
+                filteredResults.map((r, i) => (
                   <tr key={r._id}>
                     <td>{i + 1}</td>
                     <td><strong>{r.enrollmentNo}</strong></td>
@@ -729,22 +809,8 @@ export default function MarksManager({
           <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5>
               📄 {viewResult.enrollmentNo} - {viewResult.Sem}
-              <span
-                className={`ms-3 badge fs-6 px-3 py-2 ${
-                  calculateStatus(editingSubjects) === "✅ PASS"
-                    ? "bg-success"
-                    : "bg-danger"
-                }`}
-              >
-                {calculateStatus(editingSubjects)}
-              </span>
-              <span
-                className={`ms-2 badge fs-6 px-3 py-2 ${
-                  viewResult.published ? "bg-success" : "bg-warning text-dark"
-                }`}
-              >
-                {viewResult.published ? "✅ Published" : "⏳ Draft"}
-              </span>
+              
+              
             </h5>
             <div>
               {editMode && (
@@ -755,13 +821,7 @@ export default function MarksManager({
                   💾 Save
                 </button>
               )}
-              <button
-                className="btn btn-secondary btn-sm me-2"
-                onClick={() => togglePublish(viewResult._id)}
-                disabled={loading}
-              >
-                {viewResult.published ? "📤 Unpublish" : "📤 Publish"}
-              </button>
+              
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => {
@@ -874,46 +934,6 @@ export default function MarksManager({
               >
                 {editMode ? "👁️ View" : "✏️ Edit"}
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {editMode && viewResult && (
-        <div className="card mt-3">
-          <div className="card-header bg-info text-white">
-            <h6>➕ Add New Subject</h6>
-          </div>
-          <div className="card-body">
-            <div className="row g-2">
-              <div className="col-md-5">
-                <input
-                  className="form-control"
-                  placeholder="Subject Name"
-                  value={newSubject.name}
-                  onChange={(e) => setNewSubject({ ...newSubject, name: e.target.value })}
-                />
-              </div>
-              <div className="col-md-3">
-                <input
-                  className="form-control"
-                  type="number"
-                  placeholder="Marks"
-                  min="0"
-                  max="70"
-                  value={newSubject.marks}
-                  onChange={(e) => setNewSubject({ ...newSubject, marks: e.target.value })}
-                />
-              </div>
-              <div className="col-md-4">
-                <button
-                  className="btn btn-primary w-100"
-                  onClick={addSubject}
-                  disabled={!newSubject.name.trim() || loading}
-                >
-                  ➕ Add Subject
-                </button>
-              </div>
             </div>
           </div>
         </div>
