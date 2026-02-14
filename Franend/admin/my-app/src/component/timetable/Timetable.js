@@ -6,8 +6,9 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import PdfForm from "../circular/PdfForm";
 import PdfList from "../circular/PdfList";
+import Loader from "../loader";
 
-const API_URL = "http://localhost:3000/api/timetable";
+const API_URL = `${process.env.REACT_APP_API_URL}/timetable`;
 
 export default function Timetable() {
   const [timetables, setTimetables] = useState([]);
@@ -15,6 +16,8 @@ export default function Timetable() {
   const [description, setDescription] = useState("");
   const [editId, setEditId] = useState(null);
   const [filters, setFilters] = useState({ description: "" });
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     fetchTimetables();
@@ -33,33 +36,43 @@ export default function Timetable() {
   };
 
   // 🔥 ADD / UPDATE
-  const handleSubmit = async () => {
-    if (!description.trim()) return toast.error("Description required");
+ const handleSubmit = async () => {
+  if (!description.trim()) return toast.error("Description required");
 
-    const formData = new FormData();
-    formData.append("description", description.trim());
-    if (pdf) formData.append("pdf", pdf);
+  const formData = new FormData();
+  formData.append("description", description.trim());
+  if (pdf) formData.append("pdf", pdf);
 
-    try {
-      if (editId) {
-        await axios.put(`${API_URL}/${editId}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("✅ Timetable Updated!");
-      } else {
-        await axios.post(API_URL, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("✅ Timetable Added!");
-      }
-
-      resetForm();
-      fetchTimetables();
-    } catch (err) {
-      console.error(err);
-      toast.error("❌ Error saving timetable");
-    }
+  const tokenKey = process.env.REACT_APP_ADMIN_TOKEN_KEY || "adminToken";
+  const token = localStorage.getItem(tokenKey);
+  const headers = {
+    "Content-Type": "multipart/form-data",
   };
+  if (token) {
+    headers["Authorization"] = token;
+  }
+
+  try {
+    setLoading(true); // 🔥 LOADER ON
+
+    if (editId) {
+      await axios.put(`${API_URL}/${editId}`, formData, { headers });
+      toast.success("✅ Timetable Updated!");
+    } else {
+      await axios.post(API_URL, formData, { headers });
+      toast.success("✅ Timetable Added!");
+    }
+
+    resetForm();
+    fetchTimetables();
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.error || err.response?.data?.message || "❌ Error saving timetable");
+  } finally {
+    setLoading(false); // 🔥 LOADER OFF
+  }
+};
+
 
   // 🔥 EDIT
   const handleEdit = (item) => {
@@ -71,13 +84,20 @@ export default function Timetable() {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this timetable?")) return;
 
+    const tokenKey = process.env.REACT_APP_ADMIN_TOKEN_KEY || "adminToken";
+    const token = localStorage.getItem(tokenKey);
+    const headers = {};
+    if (token) {
+      headers["Authorization"] = token;
+    }
+
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await axios.delete(`${API_URL}/${id}`, { headers });
       toast.success("✅ Timetable Deleted!");
       fetchTimetables();
     } catch (err) {
       console.error(err);
-      toast.error("❌ Error deleting timetable");
+      toast.error(err.response?.data?.error || err.response?.data?.message || "❌ Error deleting timetable");
     }
   };
 
@@ -98,32 +118,10 @@ export default function Timetable() {
   return (
     <div className="container mt-4">
       <ToastContainer />
+      {loading && <Loader />}
 
-      {/* 🔥 STATS */}
-      {/* <div className="row mb-4">
-        <div className="col-md-3">
-          <div className="card bg-light">
-            <div className="card-body text-center">
-              <h6>Total</h6>
-              <h4>{timetables.length}</h4>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-light">
-            <div className="card-body text-center">
-              <h6>Filtered</h6>
-              <h4>{filteredTimetables.length}</h4>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <button className="btn btn-warning w-100" onClick={fetchTimetables}>
-            🔄 Refresh
-          </button>
-        </div>
-        
-      </div> */}
+    
+    
 
       <h3 className="text-center mb-4">🕒 Timetable Manager</h3>
 
@@ -143,6 +141,7 @@ export default function Timetable() {
             editId={editId}
             onReset={resetForm}
             accept="application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/*"
+            title="Timetable"
           />
         </div>
       </div>

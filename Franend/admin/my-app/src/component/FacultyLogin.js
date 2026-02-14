@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function FacultyLogin() {
-  const API_URL = "http://localhost:3000/api/faculty"; // API for faculty
+  const API_URL = `${process.env.REACT_APP_API_URL}/faculty`; // API for faculty
 
   // ================= LOGIN STATE =================
   const [email, setEmail] = useState("");

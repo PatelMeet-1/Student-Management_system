@@ -37,7 +37,7 @@ export default function PdfList({ data, onEdit, onDelete }) {
               <td className="text-center align-middle">
                 {item.pdf ? (
                   <a
-                    href={`http://localhost:3000${item.pdf}`}
+                    href={`${process.env.REACT_APP_API_URL.replace('/api','')}${item.pdf}`}
                     target="_blank"
                     rel="noreferrer"
                     className="btn btn-info btn-sm"

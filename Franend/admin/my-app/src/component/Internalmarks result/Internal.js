@@ -6,10 +6,10 @@ export default function Internal() {
     <div className="w-100 py-4">
       <MarksManager 
         type="internal"
-        title="📝 Internal Marks Manager"           // ✅ Title fixed
-        apiBase="http://localhost:3000/api/results"
-        usersApi="http://localhost:3000/api/users"
-        coursesApi="http://localhost:3000/api/courses"
+        title="📝 Internal Marks Manager"
+        apiBase={`${process.env.REACT_APP_API_URL}/results`}
+        usersApi={`${process.env.REACT_APP_API_URL}/users`}
+        coursesApi={`${process.env.REACT_APP_API_URL}/courses`}
       />
     </div>
   )

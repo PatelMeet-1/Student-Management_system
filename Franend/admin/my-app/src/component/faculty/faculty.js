@@ -4,6 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import UnifiedSearchFilter from "./filter1"; // Import separate component
+import Loader from "../loader"
 
 export default function Faculty() {
   // ================= STATES =================
@@ -32,7 +33,7 @@ export default function Faculty() {
   // ================= FETCH COURSES =================
   const fetchCourses = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/courses");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/courses`);
       const courseData = res.data?.data || [];
       setCourses(courseData);
       
@@ -49,7 +50,7 @@ export default function Faculty() {
   // ================= FETCH FACULTIES =================
   const fetchFaculties = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/faculty");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/faculty`);
       setFaculties(res.data?.data || []);
     } catch (error) {
       toast.error("Failed to load faculties");
@@ -58,51 +59,52 @@ export default function Faculty() {
   };
 
   // ================= ADD / UPDATE =================
-  const submitFaculty = async () => {
-    const { name, contact, email, course, password } = facultyForm;
+ const submitFaculty = async () => {
+  const { name, contact, email, course, password } = facultyForm;
 
-    if (!name?.trim() || !contact?.trim() || !email?.trim() || !course) {
-      return toast.error("All fields are required");
+  if (!name?.trim() || !contact?.trim() || !email?.trim() || !course) {
+    return toast.error("All fields are required");
+  }
+
+  if (!/^\d{10}$/.test(contact)) {
+    return toast.error("Contact must be 10 digits");
+  }
+
+  setLoading(true); // ← loader start
+  try {
+    if (editIndex !== null) {
+      const facultyId = faculties[editIndex]._id;
+      const updateData = {
+        name: name.trim(),
+        contact,
+        email: email.trim().toLowerCase(),
+        course,
+      };
+      if (password) updateData.password = password;
+
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/faculty/${facultyId}`,
+        updateData
+      );
+      toast.success("✅ Faculty updated successfully");
+    } else {
+      await axios.post(`${process.env.REACT_APP_API_URL}/faculty`, {
+        ...facultyForm,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+      });
+      toast.success("✅ Faculty added successfully");
     }
 
-    if (!/^\d{10}$/.test(contact)) {
-      return toast.error("Contact must be 10 digits");
-    }
+    resetForm();
+    fetchFaculties();
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Error saving faculty");
+  } finally {
+    setLoading(false); // ← loader stop
+  }
+};
 
-    setLoading(true);
-    try {
-      if (editIndex !== null) {
-        const facultyId = faculties[editIndex]._id;
-        const updateData = {
-          name: name.trim(),
-          contact,
-          email: email.trim().toLowerCase(),
-          course,
-        };
-        if (password) updateData.password = password;
-
-        await axios.put(
-          `http://localhost:3000/api/faculty/${facultyId}`,
-          updateData
-        );
-        toast.success("✅ Faculty updated successfully");
-      } else {
-        await axios.post("http://localhost:3000/api/faculty", {
-          ...facultyForm,
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-        });
-        toast.success("✅ Faculty added successfully");
-      }
-
-      resetForm();
-      fetchFaculties();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Error saving faculty");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // ================= EDIT =================
   const editFaculty = (index) => {
@@ -127,7 +129,7 @@ export default function Faculty() {
     if (!window.confirm(`Delete ${f.name}?`)) return;
 
     try {
-      await axios.delete(`http://localhost:3000/api/faculty/${f._id}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/faculty/${f._id}`);
       toast.success("✅ Faculty deleted successfully");
       fetchFaculties();
     } catch {
@@ -161,6 +163,7 @@ export default function Faculty() {
   return (
     <div className="container mt-4">
       <ToastContainer />
+  {loading && <Loader />}
 
       {/* FORM BUTTON */}
       <h3 className="text-center mb-4">🎓 Faculty Manager</h3>

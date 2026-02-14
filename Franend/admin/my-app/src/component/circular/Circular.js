@@ -6,8 +6,9 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import PdfForm from "../circular/PdfForm";
 import PdfList from "../circular/PdfList";
+import Loader from "../loader";
 
-const API_URL = "http://localhost:3000/api/circular";
+const API_URL = `${process.env.REACT_APP_API_URL}/circular`;
 
 export default function Circular() {
   const [circulars, setCirculars] = useState([]);
@@ -15,6 +16,8 @@ export default function Circular() {
   const [description, setDescription] = useState("");
   const [editId, setEditId] = useState(null);
   const [filters, setFilters] = useState({ description: "" });
+  const [loading, setLoading] = useState(false);
+
 
   // 🔥 LOAD CIRCULARS
   useEffect(() => {
@@ -33,33 +36,38 @@ export default function Circular() {
   };
 
   // 🔥 ADD / UPDATE
-  const handleSubmit = async () => {
-    if (!description.trim()) return toast.error("Description required");
+ const handleSubmit = async () => {
+  if (!description.trim()) return toast.error("Description required");
 
-    const formData = new FormData();
-    formData.append("description", description.trim());
-    if (pdf) formData.append("pdf", pdf);
+  const formData = new FormData();
+  formData.append("description", description.trim());
+  if (pdf) formData.append("pdf", pdf);
 
-    try {
-      if (editId) {
-        await axios.put(`${API_URL}/${editId}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("✅ Circular Updated!");
-      } else {
-        await axios.post(API_URL, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("✅ Circular Added!");
-      }
+  try {
+    setLoading(true); // 🔥 LOADER ON
 
-      resetForm();
-      fetchCirculars();
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-      toast.error("❌ Error saving circular");
+    if (editId) {
+      await axios.put(`${API_URL}/${editId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("✅ Circular Updated!");
+    } else {
+      await axios.post(API_URL, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("✅ Circular Added!");
     }
-  };
+
+    resetForm();
+    fetchCirculars();
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    toast.error("❌ Error saving circular");
+  } finally {
+    setLoading(false); // 🔥 LOADER OFF
+  }
+};
+
 
   // 🔥 EDIT
   const handleEdit = (item) => {
@@ -97,6 +105,7 @@ export default function Circular() {
   return (
     <div className="container mt-4">
       <ToastContainer />
+      {loading && <Loader />}
 
       {/* 🔥 STATS */}
       

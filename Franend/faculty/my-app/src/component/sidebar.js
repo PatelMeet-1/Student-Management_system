@@ -10,20 +10,24 @@ import {
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  
 
-  const [faculty, setFaculty] = useState(null);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); // MOBILE default closed
 
-  // ❌ NO REDIRECT HERE
+  // ✅ FIX: screen resize listener
   useEffect(() => {
-    const storedFaculty = localStorage.getItem("faculty");
-    if (storedFaculty) {
-      setFaculty(JSON.parse(storedFaculty));
-    }
-    // initialize sidebar open state based on viewport width
-    if (typeof window !== "undefined") {
-      setIsOpen(window.innerWidth >= 768);
-    }
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsOpen(true); // Desktop = always open
+      } else {
+        setIsOpen(false); // Mobile = default closed
+      }
+    };
+
+    handleResize(); // initial run
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const logout = () => {
@@ -35,119 +39,111 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* ☰ MOBILE TOGGLE ONLY */}
       <button
-        className="sidebar-toggle"
-        aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
+        className="sidebar-toggle d-md-none"
         onClick={() => setIsOpen(!isOpen)}
       >
         ☰
       </button>
 
       <div
-        className={`bg-dark text-white d-flex flex-column sidebar ${!isOpen ? "collapsed" : ""}`}
-        style={{
-          width: "260px",
-          minHeight: "100vh",
-          padding: "20px",
-        }}
+        className={`sidebar bg-dark text-white ${
+          isOpen ? "open" : "closed"
+        }`}
       >
-      <div className="mb-4 text-center">
-        <h5>🎓 Faculty Panel</h5>
-        
+        <h5 className="text-center mb-3">🎓 Faculty Panel</h5>
+        <hr />
+
+        <ul className="list-unstyled flex-grow-1">
+          <li
+            className={`sidebar-item ${isActive("/faculty-dashboard") && "active"}`}
+            onClick={() => navigate("/faculty-dashboard")}
+          >
+            <FaUser className="me-2" /> Personal Profile
+          </li>
+
+          <li
+            className={`sidebar-item ${isActive("/internal-result") && "active"}`}
+            onClick={() => navigate("/internal-result")}
+          >
+            <FaClipboardList className="me-2" /> Internal Result
+          </li>
+
+          <li
+            className={`sidebar-item ${isActive("/practical-result") && "active"}`}
+            onClick={() => navigate("/practical-result")}
+          >
+            <FaFlask className="me-2" /> Practical Result
+          </li>
+        </ul>
+
+        <button className="btn btn-danger mt-3" onClick={logout}>
+          <FaSignOutAlt /> Logout
+        </button>
       </div>
 
-      <hr />
+      <style>{`
+        .sidebar {
+          width: 260px;
+          min-height: 100vh;
+          padding: 20px;
+          transition: transform 0.3s ease;
+        }
 
-      <ul className="list-unstyled flex-grow-1">
-        <li
-          className={`sidebar-item ${isActive("/faculty-dashboard") && "active"}`}
-          onClick={() => navigate("/faculty-dashboard")}
-        >
-          <FaUser className="me-2" /> Personal Profile
-        </li>
+        .sidebar-item {
+          padding: 10px;
+          border-radius: 6px;
+          cursor: pointer;
+        }
 
-        <li
-          className={`sidebar-item ${isActive("/internal-result") && "active"}`}
-          onClick={() => navigate("/internal-result")}
-        >
-          <FaClipboardList className="me-2" /> Internal Result
-        </li>
+        .sidebar-item:hover {
+          background: #495057;
+        }
 
-        <li
-          className={`sidebar-item ${isActive("/practical-result") && "active"}`}
-          onClick={() => navigate("/practical-result")}
-        >
-          <FaFlask className="me-2" /> Practical Result
-        </li>
-      </ul>
+        .active {
+          background: #0d6efd;
+        }
 
-      <button className="btn btn-danger mt-3" onClick={logout}>
-        <FaSignOutAlt /> Logout
-      </button>
-
-      <style>
-        {`
-          .sidebar-item {
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 6px;
+        /* MOBILE */
+        @media (max-width: 767px) {
+          .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1030;
           }
-          .sidebar-item:hover {
-            background: #495057;
+
+          .sidebar.closed {
+            transform: translateX(-110%);
           }
-          .active {
-            background: #0d6efd;
+
+          .sidebar.open {
+            transform: translateX(0);
           }
-          /* Toggle button (mobile) */
+
           .sidebar-toggle {
-            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 1040;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 18px;
           }
+        }
 
-          /* Mobile behavior: hide/show sidebar with transform */
-          @media (max-width: 767px) {
-            .sidebar {
-              position: fixed;
-              top: 0;
-              left: 0;
-              height: 100vh;
-              z-index: 1030;
-              transform: translateX(0);
-              transition: transform 0.25s ease-in-out;
-              box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-            }
-            .sidebar.collapsed {
-              transform: translateX(-110%);
-            }
-            .sidebar-toggle {
-              display: inline-block;
-              position: fixed;
-              top: 12px;
-              left: 12px;
-              z-index: 1040;
-              background: #0d6efd;
-              color: #fff;
-              border: none;
-              padding: 8px 10px;
-              border-radius: 6px;
-              font-size: 18px;
-              line-height: 1;
-            }
+        /* DESKTOP */
+        @media (min-width: 768px) {
+          .sidebar {
+            position: fixed;
+            transform: none !important;
           }
-
-          /* Desktop: ensure toggle hidden and sidebar static */
-          @media (min-width: 768px) {
-            .sidebar {
-              position: static;
-              transform: none !important;
-              box-shadow: none;
-            }
-            .sidebar-toggle {
-              display: none;
-            }
-          }
-        `}
-      </style>
-      </div>
+        }
+      `}</style>
     </>
   );
 }

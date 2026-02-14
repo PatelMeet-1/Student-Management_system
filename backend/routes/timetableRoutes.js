@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/upload");
+const adminAuth = require("../middleware/adminAuth");
 const TimetableController = require("../controllers/TimetableController");
 
-router.post("/", upload.single("pdf"), TimetableController.createTimetable);
+// Public routes (GET)
 router.get("/", TimetableController.getTimetables);
-router.put("/:id", upload.single("pdf"), TimetableController.updateTimetable);
-router.delete("/:id", TimetableController.deleteTimetable);
+
+// Admin protected routes (POST, PUT, DELETE)
+router.post("/", adminAuth, upload.single("pdf"), TimetableController.createTimetable);
+router.put("/:id", adminAuth, upload.single("pdf"), TimetableController.updateTimetable);
+router.delete("/:id", adminAuth, TimetableController.deleteTimetable);
 
 module.exports = router;

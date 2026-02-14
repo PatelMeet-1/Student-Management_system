@@ -7,9 +7,9 @@ export default function UniversityMarks() {
       <MarksManager 
         type="university"
         title="🎓 University Marks Manager"
-        apiBase="http://localhost:3000/api/results"
-        usersApi="http://localhost:3000/api/users"
-        coursesApi="http://localhost:3000/api/courses"
+        apiBase={`${process.env.REACT_APP_API_URL}/results`}
+        usersApi={`${process.env.REACT_APP_API_URL}/users`}
+        coursesApi={`${process.env.REACT_APP_API_URL}/courses`}
       />
     </div>
   );

@@ -5,6 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import FilterComponent from '../component/filter'; // 🔥 NEW IMPORT
+import Loader  from "./loader";
 
 // 🔥 REUSABLE MARKS MANAGER COMPONENT
 export default function MarksManager({
@@ -560,6 +561,8 @@ export default function MarksManager({
   return (
     <div className="container mt-4">
       <ToastContainer />
+          {loading && <Loader />}   {/* 🔥 FULL SCREEN LOADER */}
+
       <h3 className="text-center mb-4">
         {title || `${type.charAt(0).toUpperCase() + type.slice(1)} Marks Manager`}
       </h3>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card, Form, Button, Alert, Container } from "react-bootstrap";
 import axios from "axios";
+import Loader from "./loader";
 
 export default function FacultyLoginForm() {
   const [email, setEmail] = useState("");
@@ -102,6 +103,8 @@ export default function FacultyLoginForm() {
 
   return (
     <Container className="py-5">
+          {loading && <Loader />}   {/* 🔥 LOGIN / OTP / RESET ke time loader */}
+
       <Card className="p-4 shadow mx-auto" style={{ maxWidth: 420 }}>
         <h4 className="text-center mb-4 text-primary fw-bold">
           {step === 0 && "👨‍🏫 Faculty Login"}

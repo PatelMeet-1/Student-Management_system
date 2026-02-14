@@ -6,10 +6,10 @@ export default function Practical() {
     <div className="py-4">  {/* 🔥 padding add */}
       <MarksManager 
         type="practical"
-        title="🧪 Practical Marks Manager"        // 🔥 TITLE ADD!
-        apiBase="http://localhost:3000/api/results"
-        usersApi="http://localhost:3000/api/users"     // 🔥 Optional
-        coursesApi="http://localhost:3000/api/courses" // 🔥 Optional
+        title="🧪 Practical Marks Manager"
+        apiBase={`${process.env.REACT_APP_API_URL}/results`}
+        usersApi={`${process.env.REACT_APP_API_URL}/users`}
+        coursesApi={`${process.env.REACT_APP_API_URL}/courses`}
       />
     </div>
   )

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Loader from "./loader"; // import upar
+
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -26,21 +28,27 @@ export default function AdminLogin() {
   const [otpMsg, setOtpMsg] = useState("");
   const [otpError, setOtpError] = useState("");
 
-  // ===== LOGIN =====
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    try {
-      const res = await axios.post("http://localhost:3000/api/admin/login", {
-        username,
-        password,
-      });
-      localStorage.setItem("adminToken", res.data.token);
-      navigate("/students", { replace: true });
-    } catch (err) {
-      setError("Invalid username or password");
-    }
-  };
+ 
+ // ===== LOGIN =====
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true); // loader start
+  try {
+    const res = await axios.post(`${process.env.REACT_APP_API_URL}/admin/login`, {
+      username,
+      password,
+    });
+    const tokenKey = process.env.REACT_APP_ADMIN_TOKEN_KEY || "adminToken";
+    localStorage.setItem(tokenKey, res.data.token);
+    navigate("/students", { replace: true });
+  } catch (err) {
+    setError("Invalid username or password");
+  } finally {
+    setLoading(false); // loader stop
+  }
+};
+
 
   // ===== SEND OTP =====
   const handleSendOTP = async () => {
@@ -48,7 +56,7 @@ export default function AdminLogin() {
     setOtpMsg("");
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/api/admin/send-otp", { email });
+      await axios.post(`${process.env.REACT_APP_API_URL}/admin/send-otp`, { email });
       setOtpMsg("✅ OTP sent to your email");
       setShowOTP(true);
     } catch (err) {
@@ -70,16 +78,25 @@ export default function AdminLogin() {
       if (newPassOTP.trim() !== "") body.newPassword = newPassOTP;
 
       await axios.post(
-        "http://localhost:3000/api/admin/reset-username-password",
+        `${process.env.REACT_APP_API_URL}/admin/reset-username-password`,
         body
       );
 
       setOtpMsg("✅ Account updated successfully");
-      setShowOTP(false);
+      
+      // Reset all form fields
       setEmail("");
       setOtp("");
       setNewPassOTP("");
       setNewUsername("");
+      
+      // Close modal after 1.5 seconds and show login page
+      setTimeout(() => {
+        setShowForgot(false);
+        setShowOTP(false);
+        setFpError("");
+        setFpMsg("");
+      }, 1500);
     } catch (err) {
       setOtpError(err.response?.data?.message || "❌ OTP verification failed");
     } finally {
@@ -97,6 +114,8 @@ export default function AdminLogin() {
         justifyContent: "center",
       }}
     >
+          {loading && <Loader />} {/* loader tabhi show hoga jab loading true ho */}
+
       {/* ===== LOGIN CARD ===== */}
       <div
         className="card shadow-lg p-4"

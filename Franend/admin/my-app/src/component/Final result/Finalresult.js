@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import FilterComponent from "./Filter"; // 🔥 NEW IMPORT
 
 export default function FinalResultManager() {
-  const RESULTS_API = "http://localhost:3000/api/results";
+  const RESULTS_API = `${process.env.REACT_APP_API_URL}/results`;
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
   const [loading, setLoading] = useState(true);

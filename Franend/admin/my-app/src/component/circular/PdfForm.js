@@ -1,14 +1,14 @@
 // PdfForm.jsx - UPDATED DESIGN
 import React from "react";
 
-export default function PdfForm({ description, setDescription, setPdf, onSubmit, editId, onReset }) {
+export default function PdfForm({ description, setDescription, setPdf, onSubmit, editId, onReset, accept, title = "Circular" }) {
   return (
     <div className="row g-3">
       <div className="col-md-8">
-        <label className="form-label fw-bold mb-2">📄 Upload PDF</label>
+        <label className="form-label fw-bold mb-2">📄 Upload File</label>
         <input
           type="file"
-          accept="application/pdf"
+          accept={accept || "application/pdf"}
           className="form-control"
           onChange={(e) => setPdf(e.target.files[0])}
         />
@@ -29,7 +29,7 @@ export default function PdfForm({ description, setDescription, setPdf, onSubmit,
             className={`btn flex-fill py-2 fs-5 ${editId ? "btn-warning" : "btn-primary"}`}
             onClick={onSubmit}
           >
-            {editId ? "💾 Update Circular" : "➕ Add Circular"}
+            {editId ? `💾 Update ${title}` : `➕ Add ${title}`}
           </button>
           <button
             className="btn btn-secondary py-2 fs-5"

@@ -18,7 +18,7 @@ export default function SemesterWiseTotalMarks() {
 
   const fetchCourses = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/courses");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/courses`);
       setCourses(res.data.data);
     } catch (err) {
       console.log(err);
@@ -27,7 +27,7 @@ export default function SemesterWiseTotalMarks() {
 
   const fetchTotalMarks = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/totalmarks");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/totalmarks`);
       setMarksList(res.data.data);
     } catch (err) {
       console.log(err);
@@ -43,7 +43,7 @@ export default function SemesterWiseTotalMarks() {
     }
 
     try {
-      await axios.post("http://localhost:3000/api/totalmarks/add", {
+      await axios.post(`${process.env.REACT_APP_API_URL}/totalmarks/add`, {
         courseId,
         semester,
         internalMarks: Number(internalMarks),
@@ -65,7 +65,7 @@ export default function SemesterWiseTotalMarks() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this record?")) {
       try {
-        await axios.delete(`http://localhost:3000/api/totalmarks/${id}`);
+        await axios.delete(`${process.env.REACT_APP_API_URL}/totalmarks/${id}`);
         fetchTotalMarks();
       } catch (err) {
         console.log(err);

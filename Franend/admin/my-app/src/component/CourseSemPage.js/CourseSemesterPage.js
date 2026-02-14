@@ -18,6 +18,8 @@ export default function CourseSemesterPage() {
   const [editingSemIndex, setEditingSemIndex] = useState(null);
 
   const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
+
 
   // ---------------- FETCH COURSES ----------------
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function CourseSemesterPage() {
 
   const fetchCourses = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/courses");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/courses`);
       setCourses(res.data.data);
     } catch (err) {
       console.log(err);
@@ -118,13 +120,13 @@ export default function CourseSemesterPage() {
 
     try {
       if (editingCourseId) {
-        await axios.put(`http://localhost:3000/api/courses/${editingCourseId}`, {
+        await axios.put(`${process.env.REACT_APP_API_URL}/courses/${editingCourseId}`, {
           courseName,
           departments
         });
         alert("Course updated successfully!");
       } else {
-        await axios.post("http://localhost:3000/api/courses/add", {
+        await axios.post(`${process.env.REACT_APP_API_URL}/courses/add`, {
           courseName,
           departments
         });
@@ -157,7 +159,7 @@ export default function CourseSemesterPage() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure?")) return;
     try {
-      await axios.delete(`http://localhost:3000/api/courses/${id}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/courses/${id}`);
       fetchCourses();
     } catch (err) {
       console.log(err);

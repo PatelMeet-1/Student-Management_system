@@ -4,10 +4,11 @@ import Filter from "../faculty/filter1"; // ✅ MOVED TO TOP - Fix ESLint issue
 import { ToastContainer, toast } from "react-toastify"; // ✅ Toastify AFTER Filter
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Loader from "../loader"
 
 export default function AddStudent() {
-  const API_URL = "http://localhost:3000/api/users";
-  const COURSES_URL = "http://localhost:3000/api/courses";
+  const API_URL = `${process.env.REACT_APP_API_URL}/users`;
+  const COURSES_URL = `${process.env.REACT_APP_API_URL}/courses`;
 
   // ✅ ALL STATES (including searchTerm - defined BEFORE use)
   const [studentForm, setStudentForm] = useState({
@@ -30,6 +31,8 @@ export default function AddStudent() {
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [searchTerm, setSearchTerm] = useState(""); // ✅ DEFINED HERE
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+
 
   // LOAD USERS
   const loadUsers = async () => {
@@ -95,40 +98,55 @@ export default function AddStudent() {
   };
 
   // SUBMIT/UPDATE STUDENT
-  const submitStudent = async () => {
-    if (
-      !studentForm.name ||
-      !studentForm.EnrollmentNo ||
-      !studentForm.course ||
-      !studentForm.department
-    )
-      return toast.error("Name, EnrollmentNo, Course & Department required");
+ const submitStudent = async () => {
+  if (
+    !studentForm.name ||
+    !studentForm.EnrollmentNo ||
+    !studentForm.course ||
+    !studentForm.department
+  )
+    return toast.error("Name, EnrollmentNo, Course & Department required");
 
-    try {
-      const formData = new FormData();
-      for (let key in studentForm) formData.append(key, studentForm[key]);
-      if (selectedPhoto) formData.append("photo", selectedPhoto);
+    // 🔐 Password validation (min 8 chars)
+if (!editId) { // only while ADD (not update)
+  if (!studentForm.password) {
+    return toast.error("❌ Password is required");
+  }
+  if (studentForm.password.length < 8) {
+    return toast.error("❌ Password must be at least 8 characters");
+  }
+}
 
-      if (editId) {
-        await axios.put(`${API_URL}/${editId}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("✅ Student Updated!");
-        setEditId(null);
-      } else {
-        await axios.post(API_URL, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("✅ Student Added!");
-      }
 
-      resetForm();
-      loadUsers();
-    } catch (error) {
-      console.error("Error submitting student:", error);
-      toast.error("❌ Error adding/updating student");
+  setLoading(true); // ← loader start
+  try {
+    const formData = new FormData();
+    for (let key in studentForm) formData.append(key, studentForm[key]);
+    if (selectedPhoto) formData.append("photo", selectedPhoto);
+
+    if (editId) {
+      await axios.put(`${API_URL}/${editId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("✅ Student Updated!");
+      setEditId(null);
+    } else {
+      await axios.post(API_URL, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("✅ Student Added!");
     }
-  };
+
+    resetForm();
+    loadUsers();
+  } catch (error) {
+    console.error("Error submitting student:", error);
+    toast.error("❌ Error adding/updating student");
+  } finally {
+    setLoading(false); // ← loader stop
+  }
+};
+
 
   // EDIT STUDENT
   const handleEdit = (user) => {
@@ -156,7 +174,7 @@ export default function AddStudent() {
     setSelectedPhoto(null);
     setPhotoPreview(
       user.photo?.startsWith("/uploads/")
-        ? `http://localhost:3000${user.photo}`
+        ? `${process.env.REACT_APP_API_URL.replace('/api','')}${user.photo}`
         : user.photo || ""
     );
   };
@@ -220,6 +238,8 @@ export default function AddStudent() {
   return (
     <div className="container mt-4">
       <ToastContainer />
+      {loading && <Loader />}
+
 
       {/* FORM BUTTON */}
       <h3 className="text-center mb-4">👨‍🎓 Student Manager</h3>
@@ -426,7 +446,7 @@ export default function AddStudent() {
                         <img
                           src={
                             u.photo.startsWith("/uploads/")
-                              ? `http://localhost:3000${u.photo}`
+                              ? `${process.env.REACT_APP_API_URL.replace('/api','')}${u.photo}`
                               : u.photo
                           }
                           alt={u.name}

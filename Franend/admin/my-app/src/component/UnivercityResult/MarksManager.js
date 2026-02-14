@@ -5,6 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import FilterComponent from '../Final result/Filter'; // 🔥 NEW IMPORT
+import Loader from "../loader";
 
 // 🔥 REUSABLE MARKS MANAGER COMPONENT
 export default function MarksManager({
@@ -560,6 +561,7 @@ export default function MarksManager({
   return (
     <div className="container mt-4">
       <ToastContainer />
+{loading && <Loader />}
       <h3 className="text-center mb-4">
         {title || `${type.charAt(0).toUpperCase() + type.slice(1)} Marks Manager`}
       </h3>
@@ -655,13 +657,14 @@ export default function MarksManager({
             />
           </div>
           <div className="col-md-4">
-            <button
-              className="btn btn-success w-100"
-              onClick={submitExcel}
-              disabled={!subjects.length || !excelRows.length || loading}
-            >
-              {loading ? "⏳ Uploading..." : `🚀 Upload ${excelRows.length} rows`}
-            </button>
+           <button
+  className="btn btn-success w-100"
+  onClick={submitExcel}
+  disabled={!subjects.length || !excelRows.length || loading}
+>
+  {loading ? "⏳ Uploading..." : `🚀 Upload ${excelRows.length} rows`}
+</button>
+
           </div>
         </div>
         {excelRows.length > 0 && (
@@ -774,13 +777,14 @@ export default function MarksManager({
                     <td>
                       <div className="btn-group btn-group-sm">
                         <button
-                          className="btn btn-success btn-sm me-1"
-                          onClick={() => togglePublish(r._id)}
-                          disabled={loading}
-                          title={r.published ? "Unpublish" : "Publish"}
-                        >
-                          {r.published ? "📤 Unpublish" : "📤 Publish"}
-                        </button>
+  className="btn btn-success btn-sm me-1"
+  onClick={() => togglePublish(r._id)}
+  disabled={loading}
+  title={r.published ? "Unpublish" : "Publish"}
+>
+  {loading ? "⏳ Processing..." : r.published ? "📤 Unpublish" : "📤 Publish"}
+</button>
+
                         <button
                           className="btn btn-info btn-sm me-1"
                           onClick={() => handleViewEdit(r)}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Sidebar from "./sidebar";
+// Sidebar removed: Layout already provides the sidebar
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -72,56 +72,43 @@ export default function FacultyDashboard() {
   if (!faculty) return null;
 
   return (
-    <div className="d-flex min-vh-100">
-      {/* SIDEBAR */}
-      <Sidebar />
+    <div className="p-4 bg-light">
+      <h3 className="mb-4">Faculty Personal Profile</h3>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-grow-1 p-4 bg-light content-shift">
-        <h3 className="mb-4">Faculty Personal Profile</h3>
-
-        <div className="card p-4 shadow-sm" style={{ maxWidth: "500px" }}>
-          {/* NAME */}
-          <div className="mb-3">
-            <label className="form-label">Name</label>
-            <input
-              className="form-control"
-              value={faculty.name}
-              disabled
-            />
-          </div>
-
-          {/* EMAIL */}
-          <div className="mb-3">
-            <label className="form-label">Email</label>
-            <input
-              className="form-control"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          {/* CONTACT */}
-          <div className="mb-3">
-            <label className="form-label">Contact</label>
-            <input
-              className="form-control"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-            />
-          </div>
-
-        
-
-          {/* BUTTON */}
-          <button
-            className="btn btn-success w-100"
-            onClick={updateProfile}
-            disabled={loading}
-          >
-            {loading ? "Updating..." : "Update Profile"}
-          </button>
+      <div className="card p-4 shadow-sm" style={{ maxWidth: "500px" }}>
+        {/* NAME */}
+        <div className="mb-3">
+          <label className="form-label">Name</label>
+          <input className="form-control" value={faculty.name} disabled />
         </div>
+        {/* EMAIL */}
+        <div className="mb-3">
+          <label className="form-label">Email</label>
+          <input
+            className="form-control"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        {/* CONTACT */}
+        <div className="mb-3">
+          <label className="form-label">Contact</label>
+          <input
+            className="form-control"
+            value={contact}
+            onChange={(e) => setContact(e.target.value)}
+          />
+        </div>
+
+        {/* BUTTON */}
+        <button
+          className="btn btn-success w-100"
+          onClick={updateProfile}
+          disabled={loading}
+        >
+          {loading ? "Updating..." : "Update Profile"}
+        </button>
       </div>
     </div>
   );

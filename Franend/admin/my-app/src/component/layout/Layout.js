@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaChalkboardTeacher, FaUserGraduate, FaClipboardList, FaFlask, FaFileAlt, FaClock, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Loader from "../loader"
 
 export default function Layout({ active, setActive, children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -25,13 +28,18 @@ export default function Layout({ active, setActive, children }) {
     navigate("/login");
   };
 
-  const handleMenuClick = (key) => {
-    setActive(key);
-    // Close sidebar on mobile after clicking a menu item
-    if (isMobile) {
-      setSidebarOpen(false);
-    }
-  };
+ const handleMenuClick = (key) => {
+  setLoading(true);         // show loader
+  setActive(key);           // existing logic
+
+  if (isMobile) setSidebarOpen(false);
+
+  // simulate loading (or replace with actual data fetch if needed)
+  setTimeout(() => setLoading(false), 500);
+};
+
+
+  
 
   const SIDEBAR_WIDTH = "260px";
 
@@ -86,6 +94,9 @@ export default function Layout({ active, setActive, children }) {
         />
       )}
 
+
+      {/* ================= LOADER ================= */}
+{loading && <Loader />}
       {/* ================= SIDEBAR ================= */}
       <div
         className="d-flex flex-column p-3"
