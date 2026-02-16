@@ -8,7 +8,7 @@ import PdfForm from "../circular/PdfForm";
 import PdfList from "../circular/PdfList";
 import Loader from "../loader";
 
-const API_URL = `${process.env.REACT_APP_API_URL}/circular`;
+const API_URL = `${process.env.REACT_APP_API_URL}/api/circular`;
 
 export default function Circular() {
   const [circulars, setCirculars] = useState([]);
