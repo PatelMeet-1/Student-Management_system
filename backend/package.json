@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
-  "start": "node server.js",
-  "encrypt-passwords": "node scripts/encryptPasswords.js"
-},
-
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "encrypt-passwords": "node scripts/encryptPasswords.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
