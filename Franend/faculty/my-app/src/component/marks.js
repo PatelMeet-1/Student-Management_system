@@ -60,6 +60,38 @@ export default function MarksManager({
     return [...new Set(results.map(r => r.department).filter(Boolean))].sort();
   };
 
+  // Faculty panel: filter dropdown options bhi sirf faculty ke course/dept/sem
+  const isFacultyMode = !!(
+    typeof localStorage !== "undefined" &&
+    (() => {
+      try {
+        const d = JSON.parse(localStorage.getItem("facultyData") || "null");
+        return d?.course?._id || d?.course;
+      } catch {
+        return false;
+      }
+    })()
+  );
+  const filterUniqueCourses = isFacultyMode
+    ? [...new Set(courses.map((c) => c.courseName).filter(Boolean))].sort()
+    : getUniqueCourses();
+  const filterUniqueDepartments = isFacultyMode
+    ? [
+        ...new Set(
+          courses.flatMap((c) => c.departments?.map((d) => d.departmentName) || []).filter(Boolean)
+        ),
+      ].sort()
+    : getUniqueDepartments();
+  const filterUniqueSemesters = isFacultyMode
+    ? [
+        ...new Set(
+          courses.flatMap((c) =>
+            c.departments?.flatMap((d) => d.semesters?.map((s) => s.semesterName) || []) || []
+          ).filter(Boolean)
+        ),
+      ].sort()
+    : getUniqueSemesters();
+
   // 🔥 HELPER FUNCTIONS FOR FILTERING
   const calculateStatus = (subjects) => {
     if (!subjects?.length) return "No Subjects";
@@ -220,12 +252,19 @@ export default function MarksManager({
   const loadCourses = async () => {
     try {
       const res = await axios.get(COURSES_API);
-      const data =
+      let data =
         res.data.success && Array.isArray(res.data.data)
           ? res.data.data
           : Array.isArray(res.data)
           ? res.data
           : [];
+
+      // Faculty panel: sirf wahi course dikhao jis se faculty register hai
+      const facultyData = JSON.parse(localStorage.getItem("facultyData") || "null");
+      const facultyCourseId = facultyData?.course?._id || facultyData?.course;
+      if (facultyCourseId) {
+        data = data.filter((c) => String(c._id) === String(facultyCourseId));
+      }
       setCourses(data);
     } catch (err) {
       console.error("Courses error:", err);
@@ -696,9 +735,9 @@ export default function MarksManager({
   showFailedStudents={showFailedStudents}
   topLimit={topLimit}
 
-  uniqueSemesters={getUniqueSemesters()}
-  uniqueCourses={getUniqueCourses()}
-  uniqueDepartments={getUniqueDepartments()}
+  uniqueSemesters={filterUniqueSemesters}
+  uniqueCourses={filterUniqueCourses}
+  uniqueDepartments={filterUniqueDepartments}
 
   filteredCount={filteredResults.length}
   totalFilteredCount={results.length}

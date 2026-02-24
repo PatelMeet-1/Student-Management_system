@@ -73,7 +73,7 @@ export default function FacultyDashboard() {
 
   return (
     <div className="p-4 bg-light">
-      <h3 className="mb-4">Faculty Personal Profile</h3>
+      <h3 className="mb-4">HOD Personal Profile</h3>
 
       <div className="card p-4 shadow-sm" style={{ maxWidth: "500px" }}>
         {/* NAME */}

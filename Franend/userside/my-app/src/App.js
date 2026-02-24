@@ -1,8 +1,17 @@
 import React from "react";
-import LoginUpdate from "./component/StudentLoginResult";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import StudentLoginResult from "./component/StudentLoginResult";
 
 function App() {
-  return <LoginUpdate />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<StudentLoginResult />} />
+        <Route path="login" element={<StudentLoginResult />} />
+        <Route path="*" element={<StudentLoginResult />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

@@ -45,7 +45,7 @@ export default function Layout({ active, setActive, children }) {
 
   const menuItems = [
     { key: "course", label: "Add Course & Semester", icon: <FaChalkboardTeacher /> },
-    { key: "faculty", label: "Add Faculty", icon: <FaUserGraduate /> },
+    { key: "faculty", label: "Add HOD", icon: <FaUserGraduate /> },
     { key: "students", label: "Add Student", icon: <FaClipboardList /> },
     { key: "Result", label: "University Result Add", icon: <FaFileAlt /> },
     { key: "internal", label: "Internal Marks Result", icon: <FaFileAlt /> },

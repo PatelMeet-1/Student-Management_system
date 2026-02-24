@@ -169,7 +169,7 @@
 
       try {
         const response = await fetch(`http://localhost:3000/api/users/${storedUser._id}`, {
-          method: 'PUT',  // Make sure your backend supports PUT
+          metFaculty: 'PUT',  // Make sure your backend supports PUT
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contact: newContact })
         });

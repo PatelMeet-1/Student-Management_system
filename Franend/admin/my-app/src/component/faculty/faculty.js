@@ -166,13 +166,13 @@ export default function Faculty() {
   {loading && <Loader />}
 
       {/* FORM BUTTON */}
-      <h3 className="text-center mb-4">🎓 Faculty Manager</h3>
+      <h3 className="text-center mb-4">🎓 HOD Manager</h3>
       <div className="text-center mb-4 ">
         <button 
           className="btn btn-primary btn-lg py-3 px-5 fs-4 w-100" 
           onClick={() => setShowForm(!showForm)}
         >
-          ➕ Add New Faculty
+          ➕ Add New HOD
         </button>
       </div>
 
@@ -186,7 +186,7 @@ export default function Faculty() {
                 <label className="form-label fw-bold">👤 Faculty Name <span className="text-danger">*</span></label>
                 <input
                   className="form-control"
-                  placeholder="Enter faculty name"
+                  placeholder="Enter HOD name"
                   value={facultyForm.name}
                   onChange={(e) =>
                     setFacultyForm({ ...facultyForm, name: e.target.value })
@@ -211,7 +211,7 @@ export default function Faculty() {
                 <input
                   className="form-control"
                   type="email"
-                  placeholder="faculty@example.com"
+                  placeholder="HOD@example.com"
                   value={facultyForm.email}
                   onChange={(e) =>
                     setFacultyForm({ ...facultyForm, email: e.target.value })
@@ -267,7 +267,7 @@ export default function Faculty() {
                 ) : editIndex !== null ? (
                   "💾 Update Faculty"
                 ) : (
-                  "➕ Add Faculty"
+                  "➕ HOD Faculty"
                 )}
               </button>
 

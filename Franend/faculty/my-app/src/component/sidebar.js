@@ -52,7 +52,7 @@ export default function Sidebar() {
           isOpen ? "open" : "closed"
         }`}
       >
-        <h5 className="text-center mb-3">🎓 Faculty Panel</h5>
+        <h5 className="text-center mb-3">🎓 HOD Panel</h5>
         <hr />
 
         <ul className="list-unstyled flex-grow-1">

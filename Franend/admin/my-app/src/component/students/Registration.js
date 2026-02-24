@@ -108,11 +108,19 @@ export default function AddStudent() {
     return toast.error("Name, EnrollmentNo, Course & Department required");
 
     // 🔐 Password validation (min 8 chars)
-if (!editId) { // only while ADD (not update)
+// 🔐 Password validation in submitStudent
+if (!editId) {
+  // Add student
   if (!studentForm.password) {
     return toast.error("❌ Password is required");
   }
   if (studentForm.password.length < 8) {
+    return toast.error("❌ Password must be at least 8 characters");
+  }
+} else {
+  // Update student
+  // Agar user password change kar raha hai
+  if (studentForm.password && studentForm.password.length < 8) {
     return toast.error("❌ Password must be at least 8 characters");
   }
 }

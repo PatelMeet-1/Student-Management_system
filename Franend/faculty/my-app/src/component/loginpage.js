@@ -107,7 +107,7 @@ export default function FacultyLoginForm() {
 
       <Card className="p-4 shadow mx-auto" style={{ maxWidth: 420 }}>
         <h4 className="text-center mb-4 text-primary fw-bold">
-          {step === 0 && "👨‍🏫 Faculty Login"}
+          {step === 0 && "👨‍🏫 HOD Login"}
           {step === 1 && "📧 Forgot Password"}
           {step === 2 && "🔑 Reset Password"}
         </h4>
@@ -158,7 +158,7 @@ export default function FacultyLoginForm() {
         {step === 1 && (
           <Form onSubmit={handleSendOTP}>
             <Form.Group className="mb-4">
-              <Form.Label>Faculty Email</Form.Label>
+              <Form.Label>HOD Email</Form.Label>
               <Form.Control
                 type="email"
                 value={fpEmail}
