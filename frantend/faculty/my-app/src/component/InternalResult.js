@@ -1,14 +1,19 @@
 import React from 'react'
-import MarksManager from './marks'  // ✅ Correct path
+import MarksManager from './marks'
+
 export default function Internal() {
+
+  // ✅ YAHI LINE ADD KARO
+  const API_URL = process.env.REACT_APP_API_URL
+
   return (
     <div className="py-4">
       <MarksManager
         type="internal"
         title="📝 Internal Marks Manager"
-        apiBase="http://localhost:3000/api/results"
-        usersApi="http://localhost:3000/api/users"
-        coursesApi="http://localhost:3000/api/courses"
+        apiBase={`${API_URL}/results`}
+        usersApi={`${API_URL}/users`}
+        coursesApi={`${API_URL}/courses`}
       />
     </div>
   )

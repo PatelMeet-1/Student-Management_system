@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+
 import axios from "axios";
 // Sidebar removed: Layout already provides the sidebar
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function FacultyDashboard() {
+    const API_URL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
 
   const [faculty, setFaculty] = useState(null);
@@ -43,13 +45,10 @@ export default function FacultyDashboard() {
     try {
       setLoading(true);
 
-      await axios.put(
-        `http://localhost:3000/api/faculty/${faculty.id}`,
-        {
-          email,
-          contact,
-        }
-      );
+    await axios.put(
+  `${API_URL}/faculty/${faculty.id}`,
+  { email, contact }
+);
 
       const updatedFaculty = {
         ...faculty,

@@ -4,21 +4,21 @@ import * as XLSX from "xlsx";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import FilterComponent from '../component/filter'; // 🔥 NEW IMPORT
-import Loader  from "./loader";
+import FilterComponent from '../component/filter';
+import Loader from "./loader";
 
-// 🔥 REUSABLE MARKS MANAGER COMPONENT
 export default function MarksManager({
   type, // "university" | "practical" | "internal"
   title,
-  apiBase, // e.g., "/api/results", "/api/practical", "/api/internal"
+  apiBase, // e.g., "https://.../api/results"
   usersApi = "/api/users",
   coursesApi = "/api/courses",
   examTypeLabel = "Exam Type"
 }) {
+  // ✅ FIXED: Direct props use (no double BASE_URL)
   const API = apiBase;
-  const USERS_API = usersApi;
-  const COURSES_API = coursesApi;
+  const USERS_API = usersApi.startsWith('http') ? usersApi : `${process.env.REACT_APP_API_URL}${usersApi}`;
+  const COURSES_API = coursesApi.startsWith('http') ? coursesApi : `${process.env.REACT_APP_API_URL}${coursesApi}`;
 
   // ---------------- STATES ----------------
   const [students, setStudents] = useState([]);
@@ -415,6 +415,9 @@ export default function MarksManager({
             skipped++;
             continue;
           }
+
+         
+
 
           // ✅ MARKS VALIDATION FOR ALL SUBJECTS
           const subjectsData = subjects.map((sub, idx) => {

@@ -4,6 +4,7 @@ import axios from "axios";
 import Loader from "./loader";
 
 export default function FacultyLoginForm() {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [step, setStep] = useState(0); // 0=login, 1=forgot, 2=reset
@@ -25,15 +26,18 @@ export default function FacultyLoginForm() {
     setError(""); setSuccess(""); setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/api/faculty/login/faculty", {
-        email: cleanEmail,
-        password: cleanPassword,
-      });
+      const res = await axios.post(`${API_URL}/faculty/login/faculty`, {
+  email: cleanEmail,
+  password: cleanPassword,
+});
 
       console.log("✅ SUCCESS:", res.data);
+localStorage.setItem(
+  process.env.REACT_APP_FACULTY_TOKEN_KEY,
+  res.data.token
+);     
 
-      localStorage.setItem("facultyToken", res.data.token);
-      localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
+localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
       
       setSuccess(`✅ Welcome ${res.data.faculty.name}!`);
       
@@ -55,9 +59,9 @@ export default function FacultyLoginForm() {
     setError(""); setSuccess(""); setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/api/faculty/forgot-password", {
-        email: cleanEmail,
-      });
+      const res = await axios.post(`${API_URL}/faculty/forgot-password`, {
+  email: cleanEmail,
+});
       setSuccess("✅ OTP sent! Check email.");
       setStep(2);
     } catch (err) {
@@ -82,11 +86,11 @@ export default function FacultyLoginForm() {
     setError(""); setSuccess(""); setLoading(true);
 
     try {
-      await axios.post("http://localhost:3000/api/faculty/reset-password-otp", {
-        email: fpEmail.trim().toLowerCase(),
-        otp: otp.trim(),
-        newPassword: newPass,
-      });
+      await axios.post(`${API_URL}/faculty/reset-password-otp`, {
+  email: fpEmail.trim().toLowerCase(),
+  otp: otp.trim(),
+  newPassword: newPass,
+});
       
       setSuccess("✅ Password reset! Login now.");
       setTimeout(() => {
