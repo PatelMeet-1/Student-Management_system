@@ -4,6 +4,9 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// ✅ Use .env for API
+const API = process.env.REACT_APP_API_URL;
+
 export default function StudentDetails({
   loggedUser,
   setLoggedUser,
@@ -19,7 +22,7 @@ export default function StudentDetails({
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/users");
+        const res = await axios.get(`${API}/users`); // 🔥 updated
 
         const student = res.data.find(
           (u) => String(u._id) === String(loggedUser._id)
@@ -58,7 +61,7 @@ export default function StudentDetails({
       if (editPhoto) formData.append("photo", editPhoto);
 
       const res = await axios.put(
-        `http://localhost:3000/api/users/${loggedUser._id}`,
+        `${API}/users/${loggedUser._id}`, // 🔥 updated
         formData,
         {
           headers: {
@@ -80,9 +83,13 @@ export default function StudentDetails({
       setError("");
     } catch (err) {
       console.error("Update error:", err);
-      toast.error("❌ Failed to update details: " + (err.response?.data?.error || err.message), {
-        autoClose: 3000,
-      });
+      toast.error(
+        "❌ Failed to update details: " +
+          (err.response?.data?.error || err.message),
+        {
+          autoClose: 3000,
+        }
+      );
       setError("Failed to update details");
     }
   };
@@ -99,7 +106,6 @@ export default function StudentDetails({
 
   return (
     <>
-      {/* ✅ ONLY TIMING TOAST */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -112,11 +118,10 @@ export default function StudentDetails({
       <Card className="p-4 shadow">
         {!isEditing ? (
           <>
-            {/* PHOTO SECTION */}
             <div className="mb-4 text-center">
               {studentDetails.photo ? (
                 <img
-                  src={`http://localhost:3000${studentDetails.photo}`}
+                  src={`${API}${studentDetails.photo}`} // 🔥 updated
                   alt="Student"
                   style={{
                     width: 140,
@@ -192,7 +197,6 @@ export default function StudentDetails({
           <>
             <h5 className="mb-4">Update Your Details</h5>
 
-            {/* Photo Preview */}
             {editPhoto && (
               <div className="mb-4 p-3 bg-light rounded text-center">
                 <p className="text-muted small mb-2">Photo Preview:</p>

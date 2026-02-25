@@ -2,19 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Card, Button, Table, Spinner } from "react-bootstrap";
 import axios from "axios";
 
-// API endpoint
-const API = "http://localhost:3000/api/results";
+// ✅ Use .env variable
 
+const API = process.env.REACT_APP_API_URL + "/results";
 // ================= PASS/FAIL LOGIC =================
 const checkPassFail = (subjects) => {
   if (!subjects || subjects.length === 0) return "N/A";
-
-  // Fail if any subject has less than 33%
   const failed = subjects.some((s) => {
-    const ratio = (s.marks || 0) / (s.maxMarks || 1); // prevent divide by 0
+    const ratio = (s.marks || 0) / (s.maxMarks || 1);
     return ratio < 0.33;
   });
-
   return failed ? "Fail" : "Pass";
 };
 
@@ -23,22 +20,20 @@ export default function InternalExamResult({ loggedUser, setError }) {
   const [selectedResult, setSelectedResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ================= FETCH INTERNAL RESULTS ONLY =================
   const fetchInternalResults = async () => {
     if (!loggedUser?._id) return;
     setLoading(true);
     try {
-      // 🔥 FIXED: SIRF INTERNAL + PUBLISHED + STUDENT MATCH
+      // 🔥 fetch internal results only
       const res = await axios.get(`${API}/published?type=internal`);
       const allResults = res.data.data || [];
 
-      // DOUBLE FILTER - Backend + Frontend
       const userInternalResults = allResults.filter(
         (r) =>
           r.studentId &&
           String(r.studentId._id) === String(loggedUser._id) &&
-          r.type === "internal" && // 🔥 EXTRA SAFETY
-          r.published === true     // 🔥 EXTRA SAFETY
+          r.type === "internal" &&
+          r.published === true
       );
 
       if (userInternalResults.length === 0) {

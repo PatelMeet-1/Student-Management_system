@@ -3,6 +3,8 @@ import { Card, Form, Button, Alert, Spinner } from "react-bootstrap";
 import axios from "axios";
 
 export default function StudentLoginForm({ setLoggedUser }) {
+  const API = process.env.REACT_APP_API_URL; // ✅ .env API
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -34,10 +36,7 @@ export default function StudentLoginForm({ setLoggedUser }) {
     setSuccess("");
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:3000/api/users/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(`${API}/users/login`, { email, password }); // 🔥 updated
       setLoggedUser(res.data.user);
       localStorage.setItem("loggedUser", JSON.stringify(res.data.user));
       setSuccess("🎉 Welcome back!");
@@ -56,9 +55,7 @@ export default function StudentLoginForm({ setLoggedUser }) {
     setSuccess("");
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/api/users/send-otp", {
-        email: fpEmail,
-      });
+      await axios.post(`${API}/users/send-otp`, { email: fpEmail }); // 🔥 updated
       setForgotStep("otp");
       setSuccess("📧 OTP sent to your email");
     } catch (err) {
@@ -76,7 +73,7 @@ export default function StudentLoginForm({ setLoggedUser }) {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/api/users/reset-password", {
+      await axios.post(`${API}/users/reset-password`, { // 🔥 updated
         email: fpEmail,
         otp,
         newPassword: newPass,
@@ -209,11 +206,7 @@ export default function StudentLoginForm({ setLoggedUser }) {
 
                   <Form.Control
                     className="mb-2 text-center fs-4 fw-bold"
-                    style={{
-                      letterSpacing: "0.4em",
-                      height: 60,
-                      borderRadius: 12,
-                    }}
+                    style={{ letterSpacing: "0.4em", height: 60, borderRadius: 12 }}
                     placeholder="000000"
                     value={otp}
                     onChange={(e) =>

@@ -193,7 +193,7 @@ export default function Circular() {
           <h5>📋 Circulars ({filteredCirculars.length}/{circulars.length})</h5>
           <div>
             <button className="btn btn-light btn-sm me-2" onClick={fetchCirculars}>🔄 Refresh</button>
-            {/* <button className="btn btn-warning btn-sm" onClick={wakeUpServer}>⚡ Wake</button> */}
+            <button className="btn btn-warning btn-sm" onClick={wakeUpServer}>⚡ Wake</button>
           </div>
         </div>
         <div className="card-body p-0">

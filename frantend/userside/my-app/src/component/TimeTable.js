@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button } from "react-bootstrap";
 
-export default function TimeTable({ setError }) {
+export default function TimeTable({ setError, API }) {
   const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchTables = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/timetable");
-      if (!res.ok) throw new Error();
+      const res = await fetch(`${API}/timetable`); // ✅ use API from .env
+      if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       setTables(data);
-    } catch {
+    } catch (err) {
+      console.error(err);
       setError("Failed to load time table");
     } finally {
       setLoading(false);
@@ -39,8 +40,7 @@ export default function TimeTable({ setError }) {
 
             <p className="text-muted mb-1">
               <small>
-                Uploaded on :{" "}
-                {new Date(tt.createdAt).toLocaleDateString("en-GB")}
+                Uploaded on: {new Date(tt.createdAt).toLocaleDateString("en-GB")}
               </small>
             </p>
 
@@ -48,7 +48,7 @@ export default function TimeTable({ setError }) {
 
             {tt.pdf && (
               <a
-                href={`http://localhost:3000${tt.pdf}`}
+                href={`${API}${tt.pdf}`} // ✅ use API here
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-sm btn-primary"

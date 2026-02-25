@@ -2,13 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Card, Button } from "react-bootstrap";
 
 export default function Circular({ loggedUser, setError }) {
+  // At the top of your component
+const API_URL = process.env.REACT_APP_API_URL;
   const [circulars, setCirculars] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchCirculars = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/circular");
+      // In fetchCirculars:
+const res = await fetch(`${API_URL}/circular`);
       if (!res.ok) throw new Error("Failed to fetch circulars");
       const data = await res.json();
       setCirculars(data);
@@ -50,16 +53,16 @@ export default function Circular({ loggedUser, setError }) {
             <p>{circular.description}</p>
 
             {/* ✅ View PDF */}
-            {circular.pdf && (
-              <a
-                href={`http://localhost:3000${circular.pdf}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-sm btn-primary"
-              >
-                📄 View Circular
-              </a>
-            )}
+           {circular.pdf && (
+  <a
+    href={`${API_URL}${circular.pdf}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="btn btn-sm btn-primary"
+  >
+    📄 View Circular
+  </a>
+)}
           </Card>
         ))
       ) : (

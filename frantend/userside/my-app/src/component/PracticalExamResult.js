@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Card, Button, Table, Spinner } from "react-bootstrap";
 import axios from "axios";
 
-const API = "http://localhost:3000/api/results";
+// ✅ Use .env variable
+const API = process.env.REACT_APP_API_URL + "/results";
 const PRACTICAL_API = `${API}/published?type=practical`;
 
 // ================= PASS/FAIL LOGIC =================

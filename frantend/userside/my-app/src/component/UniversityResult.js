@@ -5,8 +5,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const RESULTS_API = "http://localhost:3000/api/results";
-
 // ================= GRADE SYSTEM =================
 const calculateGrade = (percent) => {
   if (percent >= 90) return "A+";
@@ -21,13 +19,17 @@ const calculateGrade = (percent) => {
 
 // ================= PASS/FAIL LOGIC =================
 const checkPassFail = (subjects) => {
-  return subjects.some((s) => ((s.marks || 0) / (s.maxMarks || 1)) < 0.33) ? "FAIL" : "PASS";
+  return subjects.some((s) => ((s.marks || 0) / (s.maxMarks || 1)) < 0.33)
+    ? "FAIL"
+    : "PASS";
 };
 
 export default function FinalResultTable({ loggedUser }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedSemester, setExpandedSemester] = useState(null);
+
+  const RESULTS_API = process.env.REACT_APP_API_URL; // ✅ use .env
 
   // ================= FETCH ONLY PUBLISHED RESULTS =================
   useEffect(() => {
@@ -36,16 +38,15 @@ export default function FinalResultTable({ loggedUser }) {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        // 🔥 FIXED: SIRF PUBLISHED RESULTS
-        const res = await axios.get(`${RESULTS_API}/published`);
+        const res = await axios.get(`${RESULTS_API}/results/published`);
         const data = Array.isArray(res.data) ? res.data : res.data.data || [];
 
         // Only logged-in student's PUBLISHED results
         const userResults = data.filter(
-          (r) => 
-            r.studentId && 
+          (r) =>
+            r.studentId &&
             String(r.studentId._id) === String(loggedUser._id) &&
-            r.published === true  // 🔥 PUBLISHED CHECK
+            r.published === true
         );
 
         // Group results by semester
@@ -83,7 +84,7 @@ export default function FinalResultTable({ loggedUser }) {
     };
 
     fetchResults();
-  }, [loggedUser]);
+  }, [loggedUser, RESULTS_API]);
 
   // ================= CALCULATE SEMESTER =================
   const calculateSemester = (semester) => {
