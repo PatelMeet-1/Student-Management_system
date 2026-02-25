@@ -334,14 +334,21 @@ exports.updatePassword = async (req, res) => {
 };
 
 // ---------------- UPDATE USER ----------------
+
 exports.updateUser = async (req, res) => {
   try {
     const updateData = { ...req.body };
     if (req.file) updateData.photo = `/uploads/${req.file.filename}`;
-    if (updateData.password) updateData.password = updateData.password; // pre-save hook hashes it
 
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Update fields manually to trigger pre-save hook
+    Object.keys(updateData).forEach((key) => {
+      user[key] = updateData[key];
+    });
+
+    await user.save(); // pre-save hook triggers here
 
     const userResponse = user.toObject();
     delete userResponse.password;
