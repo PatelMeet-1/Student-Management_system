@@ -141,7 +141,7 @@ export default function StudentLoginForm({ setLoggedUser }) {
               />
 
               <Button
-                className="w-100 fw-semibold"
+                className="w-100 fw-semibold mb-2"
                 style={{
                   background: "linear-gradient(135deg,#ff758c,#ff7eb3)",
                   border: "none",
@@ -153,6 +153,26 @@ export default function StudentLoginForm({ setLoggedUser }) {
               >
                 {loading ? <Spinner size="sm" /> : "🚀 Login"}
               </Button>
+
+              {/* ===== ADMIN & FACULTY LOGIN BUTTONS ===== */}
+              <div className="d-grid gap-2 mb-3">
+                <Button 
+                  variant="outline-danger" 
+                  size="sm" 
+                  className="fw-semibold py-2"
+                  onClick={() => window.location.href = "https://student-management-system-1frantadmin.onrender.com"}
+                >
+                  🛡️ Admin Login
+                </Button>
+                <Button 
+                  variant="outline-primary" 
+                  size="sm" 
+                  className="fw-semibold py-2"
+                  onClick={() => window.location.href = "https://student-management-system-1franthod.onrender.com"}
+                >
+                  👨‍🏫 HOD Login
+                </Button>
+              </div>
 
               <Button
                 variant="link"

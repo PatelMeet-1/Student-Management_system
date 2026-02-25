@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Loader from "./loader"; // import upar
 
-
 export default function AdminLogin() {
   const navigate = useNavigate();
 
@@ -48,7 +47,6 @@ const handleLogin = async (e) => {
     setLoading(false); // loader stop
   }
 };
-
 
   // ===== SEND OTP =====
   const handleSendOTP = async () => {
@@ -185,7 +183,7 @@ const handleLogin = async (e) => {
 
           <button
             type="submit"
-            className="btn w-100 text-white fw-bold"
+            className="btn w-100 text-white fw-bold mb-2"
             style={{
               background: "linear-gradient(135deg, #667eea, #764ba2)",
               borderRadius: 10,
@@ -194,6 +192,26 @@ const handleLogin = async (e) => {
             Admin Login
           </button>
         </form>
+
+        {/* ===== FACULTY & STUDENT LOGIN BUTTONS ===== */}
+        <div className="text-center">
+          <button
+            type="button"
+            className="btn btn-outline-primary w-100 me-1 mb-2 fw-semibold"
+            style={{ borderRadius: 10 }}
+            onClick={() => navigate("https://student-management-system-1franthod.onrender.com")}
+          >
+            HOD Login
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-success w-100 ms-1 fw-semibold"
+            style={{ borderRadius: 10 }}
+            onClick={() => navigate("https://student-management-system-1frantuser.onrender.com")}
+          >
+            Student Login
+          </button>
+        </div>
 
         <div className="text-center mt-3 text-muted" style={{ fontSize: 13 }}>
           © {new Date().getFullYear()} SRMS Admin Panel

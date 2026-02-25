@@ -27,23 +27,23 @@ export default function FacultyLoginForm() {
 
     try {
       const res = await axios.post(`${API_URL}/faculty/login/faculty`, {
-  email: cleanEmail,
-  password: cleanPassword,
-});
+       email: cleanEmail,
+       password: cleanPassword,
+     });
 
       console.log("✅ SUCCESS:", res.data);
 localStorage.setItem(
-  process.env.REACT_APP_FACULTY_TOKEN_KEY,
-  res.data.token
-);     
+       process.env.REACT_APP_FACULTY_TOKEN_KEY,
+       res.data.token
+     );     
 
 localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
-      
-      setSuccess(`✅ Welcome ${res.data.faculty.name}!`);
-      
-      setTimeout(() => {
-        window.location.href = "/faculty/dashboard";
-      }, 1500);
+       
+       setSuccess(`✅ Welcome ${res.data.faculty.name}!`);
+       
+       setTimeout(() => {
+         window.location.href = "/faculty/dashboard";
+       }, 1500);
 
     } catch (err) {
       console.error("💥 ERROR:", err.response?.data);
@@ -60,8 +60,8 @@ localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
 
     try {
       const res = await axios.post(`${API_URL}/faculty/forgot-password`, {
-  email: cleanEmail,
-});
+       email: cleanEmail,
+     });
       setSuccess("✅ OTP sent! Check email.");
       setStep(2);
     } catch (err) {
@@ -87,17 +87,17 @@ localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
 
     try {
       await axios.post(`${API_URL}/faculty/reset-password-otp`, {
-  email: fpEmail.trim().toLowerCase(),
-  otp: otp.trim(),
-  newPassword: newPass,
-});
-      
-      setSuccess("✅ Password reset! Login now.");
-      setTimeout(() => {
-        setStep(0);
-        setEmail(fpEmail);
-        setPassword("");
-      }, 2000);
+       email: fpEmail.trim().toLowerCase(),
+       otp: otp.trim(),
+       newPassword: newPass,
+     });
+       
+       setSuccess("✅ Password reset! Login now.");
+       setTimeout(() => {
+         setStep(0);
+         setEmail(fpEmail);
+         setPassword("");
+       }, 2000);
     } catch (err) {
       setError(err.response?.data?.message || "Reset failed");
     } finally {
@@ -107,7 +107,7 @@ localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
 
   return (
     <Container className="py-5">
-          {loading && <Loader />}   {/* 🔥 LOGIN / OTP / RESET ke time loader */}
+            {loading && <Loader />}   {/* 🔥 LOGIN / OTP / RESET ke time loader */}
 
       <Card className="p-4 shadow mx-auto" style={{ maxWidth: 420 }}>
         <h4 className="text-center mb-4 text-primary fw-bold">
@@ -142,11 +142,31 @@ localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
               />
             </Form.Group>
 
-            <Button type="submit" className="w-100 py-2 fw-bold" disabled={loading}
+            <Button type="submit" className="w-100 py-2 fw-bold mb-2" disabled={loading}
               style={{ background: "linear-gradient(45deg, #667eea, #764ba2)", border: "none" }}
             >
               {loading ? "🔄 Logging in..." : "🚀 Login"}
             </Button>
+
+            {/* ===== ADMIN & STUDENT LOGIN BUTTONS ===== */}
+            <div className="d-grid gap-2 mb-3">
+              <Button 
+                variant="outline-danger" 
+                size="sm" 
+                className="fw-semibold py-2"
+                onClick={() => window.location.href = "https://student-management-system-1frantadmin.onrender.com"}
+              >
+                🛡️ Admin Login
+              </Button>
+              <Button 
+                variant="outline-success" 
+                size="sm" 
+                className="fw-semibold py-2"
+                onClick={() => window.location.href = "https://student-management-system-1frantuser.onrender.com"}
+              >
+                👨‍🎓 Student Login
+              </Button>
+            </div>
 
             <Button
               variant="link"
