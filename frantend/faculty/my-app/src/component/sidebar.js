@@ -11,7 +11,6 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   
-
   const [isOpen, setIsOpen] = useState(false); // MOBILE default closed
 
   // ✅ FIX: screen resize listener
@@ -37,6 +36,14 @@ export default function Sidebar() {
 
   const isActive = (path) => location.pathname === path;
 
+  // ✅ MOBILE: close sidebar on tab click
+  const handleNavClick = (path) => {
+    navigate(path);
+    if (window.innerWidth < 768) {
+      setIsOpen(false);
+    }
+  };
+
   return (
     <>
       {/* ☰ MOBILE TOGGLE ONLY */}
@@ -58,21 +65,21 @@ export default function Sidebar() {
         <ul className="list-unstyled flex-grow-1">
           <li
             className={`sidebar-item ${isActive("/faculty-dashboard") && "active"}`}
-            onClick={() => navigate("/faculty-dashboard")}
+            onClick={() => handleNavClick("/faculty-dashboard")}
           >
             <FaUser className="me-2" /> Personal Profile
           </li>
 
           <li
             className={`sidebar-item ${isActive("/internal-result") && "active"}`}
-            onClick={() => navigate("/internal-result")}
+            onClick={() => handleNavClick("/internal-result")}
           >
             <FaClipboardList className="me-2" /> Internal Result
           </li>
 
           <li
             className={`sidebar-item ${isActive("/practical-result") && "active"}`}
-            onClick={() => navigate("/practical-result")}
+            onClick={() => handleNavClick("/practical-result")}
           >
             <FaFlask className="me-2" /> Practical Result
           </li>
