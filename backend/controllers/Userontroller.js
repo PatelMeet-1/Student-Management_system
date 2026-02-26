@@ -338,22 +338,31 @@ exports.updatePassword = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const updateData = { ...req.body };
-    if (req.file) updateData.photo = `/uploads/${req.file.filename}`;
+
+    // 🔥 IMPORTANT FIX — empty password hata do
+    if (!updateData.password) {
+      delete updateData.password;
+    }
+
+    if (req.file) {
+      updateData.photo = `/uploads/${req.file.filename}`;
+    }
 
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Update fields manually to trigger pre-save hook
+    // Update fields manually (pre-save hook chalega)
     Object.keys(updateData).forEach((key) => {
       user[key] = updateData[key];
     });
 
-    await user.save(); // pre-save hook triggers here
+    await user.save(); // ✅ no validation error now
 
     const userResponse = user.toObject();
     delete userResponse.password;
     res.json(userResponse);
   } catch (err) {
+    console.error("❌ Update user error:", err);
     res.status(400).json({ error: err.message });
   }
 };

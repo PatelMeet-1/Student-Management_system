@@ -11,11 +11,18 @@ export default function PdfForm({
   accept,
   title = "Circular",
 }) {
+
+  const handleSubmit = (e) => {
+    e.preventDefault();     // ✅ ONLY HERE
+    onSubmit();             // ✅ NO event pass
+  };
+
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleSubmit}>
       <div className="row g-3">
+
         <div className="col-md-8">
-          <label className="form-label fw-bold mb-2">📄 Upload File</label>
+          <label className="form-label fw-bold">📄 Upload File</label>
           <input
             type="file"
             accept={accept || "application/pdf"}
@@ -23,35 +30,34 @@ export default function PdfForm({
             onChange={(e) => setPdf(e.target.files[0])}
           />
         </div>
+
         <div className="col-md-4">
-          <label className="form-label fw-bold mb-2">📝 Description *</label>
+          <label className="form-label fw-bold">📝 Description *</label>
           <textarea
             className="form-control"
             rows={3}
-            placeholder="Enter circular description..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
-        <div className="col-12">
-          <div className="d-flex gap-2">
-            <button
-              type="submit" // ✅ form submit
-              className={`btn flex-fill py-2 fs-5 ${
-                editId ? "btn-warning" : "btn-primary"
-              }`}
-            >
-              {editId ? `💾 Update ${title}` : `➕ Add ${title}`}
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary py-2 fs-5"
-              onClick={onReset}
-            >
-              🧹 Reset
-            </button>
-          </div>
+
+        <div className="col-12 d-flex gap-2">
+          <button
+            type="submit"
+            className={`btn flex-fill ${editId ? "btn-warning" : "btn-primary"}`}
+          >
+            {editId ? `Update ${title}` : `Add ${title}`}
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onReset}
+          >
+            Reset
+          </button>
         </div>
+
       </div>
     </form>
   );

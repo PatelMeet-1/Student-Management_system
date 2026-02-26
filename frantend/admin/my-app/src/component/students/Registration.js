@@ -149,7 +149,7 @@ if (!editId) {
     loadUsers();
   } catch (error) {
     console.error("Error submitting student:", error);
-    toast.error("❌ Error adding/updating student");
+toast.error(error.response?.data?.error || "❌ Server error");
   } finally {
     setLoading(false); // ← loader stop
   }

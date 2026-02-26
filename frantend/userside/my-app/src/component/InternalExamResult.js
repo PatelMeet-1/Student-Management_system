@@ -93,47 +93,73 @@ export default function InternalExamResult({ loggedUser, setError }) {
                 <th>Total Marks</th>
                 <th>Percentage</th>
                 <th>Status</th>
+                    <th>Result Date</th> {/* ✅ NEW */}
+
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {results.map((r, i) => {
-                const total = r.subjects?.reduce((sum, s) => sum + (s.marks || 0), 0) || 0;
-                const max = r.subjects?.reduce((sum, s) => sum + (s.maxMarks || 0), 0) || 0;
-                const percent = max > 0 ? ((total / max) * 100).toFixed(2) : "0.00";
-                const status = checkPassFail(r.subjects);
+  {results.map((r, i) => {
+    const total =
+      r.subjects?.reduce((sum, s) => sum + (s.marks || 0), 0) || 0;
 
-                return (
-                  <tr key={r._id} className={status === "Fail" ? "table-danger" : ""}>
-                    <td><strong>{i + 1}</strong></td>
-                    <td>{r.Sem || r.sem || "N/A"}</td>
-                    <td>{r.course || "N/A"}</td>
-                    <td><strong>{total}/{max}</strong></td>
-                    <td>
-                      <span className={percent < 33 ? "text-danger" : "text-success"}>
-                        {percent}%
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge fs-6 px-3 py-2 ${
-                        status === "Pass" ? "bg-success" : "bg-danger"
-                      }`}>
-                        {status}
-                      </span>
-                    </td>
-                    <td>
-                      <Button 
-                        size="sm" 
-                        variant="primary" 
-                        onClick={() => setSelectedResult(r)}
-                      >
-                        👁️ View Details
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
+    const max =
+      r.subjects?.reduce((sum, s) => sum + (s.maxMarks || 0), 0) || 0;
+
+    const percent =
+      max > 0 ? ((total / max) * 100).toFixed(2) : "0.00";
+
+    const status = checkPassFail(r.subjects);
+
+    // ✅ RESULT DECLARE DATE LOGIC
+    const resultDate = r.publishedAt || r.updatedAt || r.createdAt;
+
+    return (
+      <tr
+        key={r._id}
+        className={status === "Fail" ? "table-danger" : ""}
+      >
+        <td><strong>{i + 1}</strong></td>
+        <td>{r.Sem || r.sem || "N/A"}</td>
+        <td>{r.course || "N/A"}</td>
+        <td><strong>{total}/{max}</strong></td>
+
+        <td>
+          <span className={percent < 33 ? "text-danger" : "text-success"}>
+            {percent}%
+          </span>
+        </td>
+
+        <td>
+          <span
+            className={`badge fs-6 px-3 py-2 ${
+              status === "Pass" ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {status}
+          </span>
+        </td>
+
+        {/* ✅ RESULT DECLARE DATE */}
+        <td>
+          {resultDate
+            ? new Date(resultDate).toLocaleDateString("en-GB")
+            : "N/A"}
+        </td>
+
+        <td>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={() => setSelectedResult(r)}
+          >
+            👁️ View Details
+          </Button>
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
           </Table>
         )}
       </Card>
@@ -141,6 +167,10 @@ export default function InternalExamResult({ loggedUser, setError }) {
   }
 
   // ================= FULL RESULT VIEW =================
+  const resultDate =
+  selectedResult.publishedAt ||
+  selectedResult.updatedAt ||
+  selectedResult.createdAt;
   const totalMarks = selectedResult.subjects?.reduce((sum, s) => sum + (s.marks || 0), 0) || 0;
   const maxMarks = selectedResult.subjects?.reduce((sum, s) => sum + (s.maxMarks || 0), 0) || 0;
   const percentage = maxMarks > 0 ? ((totalMarks / maxMarks) * 100).toFixed(2) : "0.00";
@@ -231,15 +261,14 @@ export default function InternalExamResult({ loggedUser, setError }) {
             {finalStatus}
           </h3>
         </div>
-        <div className="col-md-3 d-flex align-items-center justify-content-center">
-          <Button 
-            variant="outline-primary" 
-            size="lg"
-            onClick={fetchInternalResults}
-          >
-            🔄 Refresh Results
-          </Button>
-        </div>
+       <div className="col-md-3">
+  <h5>Result Date:</h5>
+  <h5 className="">
+    {resultDate
+      ? new Date(resultDate).toLocaleDateString("en-GB")
+      : "N/A"}
+  </h5>
+</div>
       </div>
     </Card>
   );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
+import { Card, Button, Table } from "react-bootstrap";  // ✅ REQUIRED FOR JSX
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -434,165 +435,198 @@ const handleDepartmentFilter = (e) => {
       </div>
 
       {/* VIEW RESULT PANEL */}
-      {viewResult && (
-        <div ref={printRef} className="print-section">
-          <style jsx>{`
-            @media print {
-              body * {
-                visibility: hidden;
-              }
-              .print-section,
-              .print-section * {
-                visibility: visible;
-              }
-              .print-section {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: white !important;
-              }
-              .no-print {
-                display: none !important;
-              }
-              .card {
-                box-shadow: none !important;
-                border: 2px solid #28a745 !important;
-              }
-            }
-          `}</style>
+ {/* 🔥 EXACT SAME RESULT FORMAT - View Button Panel */}
+{viewResult && (
+  <div ref={printRef} className="mt-5">
+    <style jsx>{`
+      @media print {
+        body * { visibility: hidden; }
+        .print-section, .print-section * { visibility: visible; }
+        .print-section { 
+          position: absolute; left: 0; top: 0; width: 100%; 
+          background: white !important; 
+        }
+        .no-print { display: none !important; }
+        .card { box-shadow: none !important; border: 2px solid #28a745 !important; }
+      }
+    `}</style>
 
-          <div className="card mt-4 border-success shadow-lg p-4 position-relative no-print-on-top">
-            <button
-              className="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-3 z-3 no-print"
-              onClick={closeResult}
-              style={{ borderRadius: "50%", width: "40px", height: "30px" }}
-            >
-              ✕
-            </button>
-            <div className="position-absolute top-0 start-0 m-3 z-3 no-print">
-              <button className="btn btn-warning btn-sm" onClick={handlePrint}>
-                🖨️ Print
-              </button>
-            </div>
+    <Card className="shadow-lg border-primary p-0 print-section no-print-on-top">
+      {/* Header Buttons */}
+      {/* <div className="position-relative">
+        <button
+          className="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-3 z-3 no-print"
+          onClick={closeResult}
+          style={{ borderRadius: "50%", width: "40px", height: "30px" }}
+        >
+          ✕
+        </button>
+        <button 
+          className="btn btn-warning btn-sm position-absolute top-0 start-0 m-3 z-3 no-print"
+          onClick={handlePrint}
+        >
+          🖨️ Print
+        </button>
+      </div> */}
+
+      {/* MAIN RESULT CARD - EXACT SAME FORMAT */}
+      <Card className="p-4 shadow-lg border-primary print-card">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h3 className="text-primary mb-1">🎓 Final Semester Result</h3>
+            <p className="mb-0 text-muted">
+              <strong>Semester:</strong> {viewResult.Sem || "N/A"} | 
+              <strong> Course:</strong> {viewResult.course || "N/A"}
+            </p>
           </div>
+          <Button 
+            variant="secondary" 
+            onClick={closeResult}
+            className="no-print"
+          >
+            ← Back to List
+          </Button>
+        </div>
 
-          <div className="card border-success shadow-lg p-4 print-card">
-            <div className="text-center mb-4">
-              <h3>🏆 SEMESTER RESULT - {viewResult.Sem}</h3>
-              <h5>
-                {viewResult.student?.name} | {viewResult.course} |{" "}
-                {viewResult.department}
-              </h5>
-              <small className="text-muted">
-                Enrollment: {viewResult.student?.EnrollmentNo}
-              </small>
-            </div>
-
-            {(() => {
-              const calc = calculateResult(viewResult);
-              return (
-                <div className="row mb-4 p-3 bg-light rounded">
-                  <div className="col-md-3">
-                    <h6>Total Marks</h6>
-                    <h4>
-                      {calc.totalMarks}/{calc.totalMax}
-                    </h4>
-                  </div>
-                  <div className="col-md-3">
-                    <h6>Percentage</h6>
-                    <h4>{calc.percentage}%</h4>
-                  </div>
-                  <div className="col-md-3">
-                    <h6>SPI</h6>
-                    <h4
-                      className={
-                        calc.status === "PASS" ? "text-success" : "text-danger"
-                      }
-                    >
-                      {calc.spi}
-                    </h4>
-                  </div>
-                  <div className="col-md-3">
-                    <h6>Status</h6>
-                    <span
-                      className={`badge w-100 p-2 ${calc.status === "PASS" ? "bg-success" : "bg-danger"}`}
-                    >
-                      {calc.status}
-                    </span>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {[
-              "internalSubjects",
-              "practicalSubjects",
-              "universitySubjects",
-            ].map((key) => {
-              const subjects = viewResult[key] || [];
-              if (!subjects.length) return null;
-              const calc = calculateResult(viewResult);
-
-              return (
-                <div key={key} className="mb-4">
-                  <h5 className="text-uppercase border-bottom pb-2">
-                    {key.replace("Subjects", "")}
-                  </h5>
-                  <div className="table-responsive">
-                    <table className="table table-sm table-bordered">
-                      <thead className="table-dark">
-                        <tr>
-                          <th>Subject</th>
-                          <th>Max Marks</th>
-                          <th>Obtained</th>
-                          <th>%</th>
-                          <th>Grade</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {calc.subjects
-                          .filter(
-                            (s) =>
-                              s.type ===
-                              key.replace("Subjects", "").toLowerCase(),
-                          )
-                          .map((s, i) => (
-                            <tr
-                              key={i}
-                              className={
-                                s.percentage < 33 ? "table-danger" : ""
-                              }
-                            >
-                              <td>{s.name}</td>
-                              <td>{s.maxMarks}</td>
-                              <td>{s.marks}</td>
-                              <td>{s.percentage}%</td>
-                              <td>{s.grade}</td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              );
-            })}
-
-            <div className="mt-4 p-3 bg-success bg-gradient rounded text-center text-white">
-              <h4>
-                {calculateResult(viewResult).status === "PASS"
-                  ? "🎉 PASS"
-                  : "⚠️ FAIL"}
-              </h4>
-              <p className="mb-0 fs-6">
-                SPI: <strong>{calculateResult(viewResult).spi}</strong> |
-                Percentage:{" "}
-                <strong>{calculateResult(viewResult).percentage}%</strong>
-              </p>
-            </div>
+        {/* Student Info */}
+        <div className="row mb-4 p-3 bg-light rounded">
+          <div className="col-md-4">
+            <strong>Name:</strong> {viewResult.student?.name || "N/A"}
+          </div>
+          <div className="col-md-4">
+            <strong>Enrollment:</strong> {viewResult.student?.EnrollmentNo || "N/A"}
+          </div>
+          <div className="col-md-4">
+            <strong>Department:</strong> {viewResult.department || "N/A"}
           </div>
         </div>
-      )}
+
+        {/* Summary Section - EXACT FORMAT */}
+        {(() => {
+          const calc = calculateResult(viewResult);
+          return (
+            <div className="row text-center p-4 bg-gradient border rounded mb-4" 
+                 style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
+              <div className="col-md-3">
+                <h5><strong>Total:</strong></h5>
+                <h3 className="text-primary">{calc.totalMarks}/{calc.totalMax}</h3>
+              </div>
+              <div className="col-md-3">
+                <h5><strong>Percentage:</strong></h5>
+                <h3 className={calc.percentage >= 33 ? "text-success" : "text-danger"}>
+                  {calc.percentage}%
+                </h3>
+              </div>
+              <div className="col-md-3">
+                <h5><strong>SPI:</strong></h5>
+                <h3 className={`fw-bold ${calc.status === "PASS" ? "text-success" : "text-danger"}`}>
+                  {calc.spi}
+                </h3>
+              </div>
+              <div className="col-md-3">
+                <h5><strong>Status:</strong></h5>
+                <h3 className={`fw-bold ${calc.status === "PASS" ? "text-success" : "text-danger"}`}>
+                  {calc.status}
+                </h3>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Subjects Tables - EXACT SAME FORMAT */}
+        {["internalSubjects", "practicalSubjects", "universitySubjects"].map((key) => {
+          const subjects = viewResult[key] || [];
+          if (!subjects.length) return null;
+          
+          const calc = calculateResult(viewResult);
+          const typeName = key.replace("Subjects", "").toUpperCase();
+
+          return (
+            <div key={key} className="mb-4">
+              <h5 className="text-primary border-bottom pb-2 mb-3">
+                📚 {typeName} Subjects ({subjects.length})
+              </h5>
+              
+              <Table bordered className="text-center mb-0" responsive>
+                <thead className="table-primary">
+                  <tr>
+                    <th>Subject</th>
+                    <th>Obtained Marks</th>
+                    <th>Max Marks</th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {calc.subjects
+                    .filter((s) => s.type === key.replace("Subjects", "").toLowerCase())
+                    .map((s, i) => {
+                      const subStatus = s.percentage >= 33 ? "PASS" : "FAIL";
+                      return (
+                        <tr key={i} className={subStatus === "FAIL" ? "table-danger" : ""}>
+                          <td><strong>{s.name}</strong></td>
+                          <td>{s.marks || 0}</td>
+                          <td>{s.maxMarks || 0}</td>
+                          <td>
+                            <span className={s.percentage >= 50 ? "text-success" : "text-danger"}>
+                              {s.percentage}%
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`badge fs-6 px-3 py-2 ${
+                              s.grade === "F" ? "bg-danger" : "bg-success"
+                            }`}>
+                              {s.grade}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`badge fs-6 px-3 py-2 ${
+                              subStatus === "PASS" ? "bg-success" : "bg-danger"
+                            }`}>
+                              {subStatus}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </Table>
+            </div>
+          );
+        })}
+
+        {/* Final Status Summary */}
+        {(() => {
+          const calc = calculateResult(viewResult);
+          return (
+            <div className="row text-center p-4 bg-gradient border rounded mt-4" 
+                 style={{ 
+                   background: calc.status === "PASS" 
+                     ? 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)' 
+                     : 'linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%)'
+                 }}>
+              <div className="col-12">
+                <h3 className={`fw-bold mb-3 ${
+                  calc.status === "PASS" ? "text-success" : "text-danger"
+                }`}>
+                  {calc.status === "PASS" ? "🎉 PASS" : "⚠️ FAIL"}
+                </h3>
+                <h5 className="text-muted">
+                  SPI: <strong>{calc.spi}</strong> | 
+                  Percentage: <strong>{calc.percentage}%</strong> | 
+                  Total Marks: <strong>{calc.totalMarks}/{calc.totalMax}</strong>
+                </h5>
+              </div>
+            </div>
+          );
+        })()}
+      </Card>
+    </Card>
+  </div>
+)}
+
+
     </div>
   );
 }

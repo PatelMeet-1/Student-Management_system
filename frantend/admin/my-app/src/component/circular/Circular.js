@@ -67,40 +67,36 @@ export default function Circular() {
   };
 
   // 🔥 FIXED FORM SUBMIT
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!description.trim()) return toast.error("📝 Description required");
+  // 🔥 NO event here
+const handleSubmit = async () => {
+  if (!description.trim()) {
+    toast.error("📝 Description required");
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append("description", description.trim());
-    if (pdf) formData.append("pdf", pdf);
+  const formData = new FormData();
+  formData.append("description", description.trim());
+  if (pdf) formData.append("pdf", pdf);
 
-    console.log("📤 FormData:");
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
+  try {
+    setLoading(true);
+
+    if (editId) {
+      await axios.put(`${API_URL}/${editId}`, formData);
+      toast.success("✅ Circular Updated!");
+    } else {
+      await axios.post(API_URL, formData);
+      toast.success("✅ Circular Added!");
     }
 
-    try {
-      setLoading(true);
-      const config = { headers: { 'Content-Type': 'multipart/form-data' } };
-
-      if (editId) {
-        await axios.put(`${API_URL}/${editId}`, formData, config);
-        toast.success("✅ Circular Updated!");
-      } else {
-        await axios.post(API_URL, formData, config);
-        toast.success("✅ Circular Added!");
-      }
-
-      resetForm();
-      fetchCirculars();
-    } catch (err) {
-      console.error("❌ SUBMIT ERROR:", err.response?.data);
-      toast.error(`❌ ${err.response?.data?.message || "Save failed"}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+    resetForm();
+    fetchCirculars();
+  } catch (err) {
+    toast.error("❌ Save failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleEdit = (item) => {
     setDescription(item.description || "");

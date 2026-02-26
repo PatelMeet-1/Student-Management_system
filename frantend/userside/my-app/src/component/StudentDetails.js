@@ -120,18 +120,20 @@ export default function StudentDetails({
           <>
             <div className="mb-4 text-center">
               {studentDetails.photo ? (
-                <img
-                  src={`${API}${studentDetails.photo}`} // 🔥 updated
-                  alt="Student"
-                  style={{
-                    width: 140,
-                    height: 140,
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: "4px solid #007bff",
-                    boxShadow: "0 4px 15px rgba(0,123,255,0.3)",
-                  }}
-                />
+             <img
+  src={`${API.replace("/api", "")}${studentDetails.photo}`}
+  alt="Student"
+  onError={(e) => {
+    e.target.src = "/default-avatar.png";
+  }}
+  style={{
+    width: 140,
+    height: 140,
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "4px solid #007bff",
+  }}
+/>
               ) : (
                 <div
                   style={{

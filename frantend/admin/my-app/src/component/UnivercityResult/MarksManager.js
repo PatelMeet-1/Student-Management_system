@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { ToastContainer, toast } from "react-toastify";
+import { Card, Button, Table } from "react-bootstrap"; // ✅ Import the missing components
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import FilterComponent from '../Final result/Filter'; // 🔥 NEW IMPORT
@@ -724,6 +725,7 @@ export default function MarksManager({
                 <th>Course</th>
                 <th>Dept</th>
                 <th>Sem</th>
+                <th>Date</th>   
                 <th>Status</th>
                 <th>Published</th>
                 <th>Subjects</th>
@@ -747,6 +749,11 @@ export default function MarksManager({
                     <td>{r.course}</td>
                     <td>{r.department}</td>
                     <td>{r.Sem}</td>
+                    <td>
+  {r.createdAt
+    ? new Date(r.createdAt).toLocaleDateString("en-IN")
+    : "-"}
+</td>
                     <td>
                       <span
                         className={`badge fs-6 px-3 py-2 ${
@@ -808,140 +815,175 @@ export default function MarksManager({
       </div>
 
       {/* Edit Panel */}
-      {viewResult && (
-        <div className="card mt-4 shadow-lg border-primary">
-          <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h5>
-              📄 {viewResult.enrollmentNo} - {viewResult.Sem}
-              
-              
-            </h5>
-            <div>
-              {editMode && (
-                <button
-                  className="btn btn-success btn-sm me-2"
-                  onClick={saveAllChanges}
-                >
-                  💾 Save
-                </button>
-              )}
-              
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => {
-                  setViewResult(null);
-                  setEditMode(false);
-                  setEditingSubjects([]);
-                }}
-              >
-                ❌ Close
-              </button>
-            </div>
-          </div>
-          
-          <div className="card-body">
-            <div className="row mb-4 p-3 bg-light rounded">
-              <div className="col-md-3">
-                <strong>Course:</strong> {viewResult.course}
-              </div>
-              <div className="col-md-3">
-                <strong>Dept:</strong> {viewResult.department}
-              </div>
-              <div className="col-md-2">
-                <strong>Sem:</strong> {viewResult.Sem}
-              </div>
-              <div className="col-md-2">
-                <strong>Subjects:</strong> {editingSubjects.length}
-              </div>
-              <div className="col-md-2">
-                <strong>Status:</strong> {calculateStatus(editingSubjects)}
-              </div>
-            </div>
-            
-            <div className="table-responsive">
-              <table className="table table-bordered">
-                <thead className={editMode ? "table-warning" : "table-primary"}>
-                  <tr>
-                    <th>Subject</th>
-                    <th>Marks</th>
-                    <th>Max</th>
-                    <th>%</th>
-                    <th>Grade</th>
-                    {editMode && <th>Actions</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {editingSubjects.map((s, i) => (
-                    <tr key={i}>
-                      <td>{s.name}</td>
-                      <td>
-                        {editMode ? (
-                          <input
-                            className={`form-control form-control-sm ${
-                              s.marks > s.maxMarks ? "is-invalid" : ""
-                            }`}
-                            type="number"
-                            min="0"
-                            max={s.maxMarks}
-                            value={s.marks || ""}
-                            onChange={(e) => handleMarksChange(i, e.target.value)}
-                            title={`Max: ${s.maxMarks}`}
-                          />
-                        ) : (
-                          <strong>{s.marks}/{s.maxMarks}</strong>
-                        )}
-                      </td>
-                      <td><strong>{s.maxMarks}</strong></td>
-                      <td>{((s.marks / s.maxMarks) * 100).toFixed(1)}%</td>
-                      <td>
-                        <span
-                          className={`badge px-2 py-1 ${
-                            (s.marks / s.maxMarks) * 100 >= 33
-                              ? "bg-success"
-                              : "bg-danger"
-                          }`}
-                        >
-                          {(s.marks / s.maxMarks) * 100 >= 33 ? "Pass" : "Fail"}
-                        </span>
-                      </td>
-                      {editMode && (
-                        <td>
-                          <div className="btn-group btn-group-sm">
-                            <button
-                              className="btn btn-warning btn-sm"
-                              onClick={() => updateSubject(viewResult._id, i)}
-                              disabled={s.marks > s.maxMarks}
-                            >
-                              💾
-                            </button>
-                            <button
-                              className="btn btn-danger btn-sm"
-                              onClick={() => deleteSubject(viewResult._id, i)}
-                            >
-                              🗑️
-                            </button>
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+     {/* 🔥 REUSABLE RESULT VIEWER COMPONENT - EXACT SAME FORMAT */}
+{viewResult && (
+  <Card className="mt-4 shadow-lg border-primary">
+    <div className="d-flex justify-content-between align-items-center mb-4 p-3 bg-primary text-white rounded-top">
+      <div>
+        <h3 className="mb-1">📚 {viewResult.type?.toUpperCase()} Exam Result</h3>
+        <p className="mb-0">
+          <strong>Semester:</strong> {viewResult.Sem || viewResult.sem || "N/A"} | 
+          <strong> Course:</strong> {viewResult.course || "N/A"}
+        </p>
+      </div>
+      <Button 
+        variant="secondary" 
+        onClick={() => {
+          setViewResult(null);
+          setEditMode(false);
+          setEditingSubjects([]);
+        }}
+      >
+        ← Back to List
+      </Button>
+    </div>
 
-            <div className="text-center mt-3">
-              <button
-                className={`btn btn-lg ${
-                  editMode ? "btn-secondary" : "btn-primary"
-                } me-2`}
-                onClick={() => setEditMode(!editMode)}
-              >
-                {editMode ? "👁️ View" : "✏️ Edit"}
-              </button>
-            </div>
-          </div>
-        </div>
+    {/* Student Info */}
+    <div className="row mb-4 p-3 bg-light rounded mx-3 mt-3">
+      <div className="col-md-4">
+        <strong>Name:</strong> {viewResult.studentId?.name || "N/A"}
+      </div>
+      <div className="col-md-4">
+        <strong>Enrollment:</strong> {viewResult.enrollmentNo || viewResult.studentId?.EnrollmentNo || "N/A"}
+      </div>
+      <div className="col-md-4">
+        <strong>Department:</strong> {viewResult.department || "N/A"}
+      </div>
+    </div>
+
+    {/* Subjects Table */}
+    <div className="table-responsive mx-3 mb-4">
+      <Table bordered className="text-center" responsive>
+        <thead className="table-primary">
+          <tr>
+            <th>Subject</th>
+            <th>Obtained Marks</th>
+            <th>Max Marks</th>
+            <th>Percentage</th>
+            <th>Status</th>
+            {editMode && <th>Actions</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {editingSubjects.map((s, i) => {
+            const subPercent = s.maxMarks > 0 ? ((s.marks / s.maxMarks) * 100).toFixed(1) : "0.0";
+            const subStatus = (s.marks / s.maxMarks) >= 0.33 ? "Pass" : "Fail";
+            
+            return (
+              <tr key={i} className={subStatus === "Fail" ? "table-danger" : ""}>
+                <td><strong>{s.name}</strong></td>
+                <td>
+                  {editMode ? (
+                    <input
+                      className={`form-control form-control-sm ${
+                        s.marks > s.maxMarks ? "is-invalid" : ""
+                      }`}
+                      type="number"
+                      min="0"
+                      max={s.maxMarks}
+                      value={s.marks || ""}
+                      onChange={(e) => handleMarksChange(i, e.target.value)}
+                      title={`Max: ${s.maxMarks}`}
+                    />
+                  ) : (
+                    <strong>{s.marks || 0}</strong>
+                  )}
+                </td>
+                <td>{s.maxMarks || 0}</td>
+                <td>{subPercent}%</td>
+                <td>
+                  <span className={`badge fs-6 px-3 py-2 ${
+                    subStatus === "Pass" ? "bg-success" : "bg-danger"
+                  }`}>
+                    {subStatus}
+                  </span>
+                </td>
+                {editMode && (
+                  <td>
+                    <div className="btn-group btn-group-sm">
+                      <button
+                        className="btn btn-warning btn-sm"
+                        onClick={() => updateSubject(viewResult._id, i)}
+                        disabled={s.marks > s.maxMarks}
+                      >
+                        💾
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => deleteSubject(viewResult._id, i)}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </Table>
+    </div>
+
+    {/* Summary */}
+    <div className="row text-center p-4 bg-gradient border rounded mx-3 mb-3" 
+         style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
+      <div className="col-md-3">
+        <h5><strong>Total:</strong></h5>
+        <h3 className="text-primary">
+          {editingSubjects.reduce((sum, s) => sum + (s.marks || 0), 0)}/
+          {editingSubjects.reduce((sum, s) => sum + (s.maxMarks || 0), 0)}
+        </h3>
+      </div>
+      <div className="col-md-3">
+        <h5><strong>Percentage:</strong></h5>
+        <h3 className={
+          getPercentage(viewResult) >= 33 ? "text-success" : "text-danger"
+        }>
+          {getPercentage(viewResult).toFixed(2)}%
+        </h3>
+      </div>
+      <div className="col-md-3">
+        <h5><strong>Status:</strong></h5>
+        <h3 className={`fw-bold ${
+          calculateStatus(editingSubjects) === "✅ PASS" 
+            ? "text-success" 
+            : "text-danger"
+        }`}>
+          {calculateStatus(editingSubjects) === "✅ PASS" ? "Pass" : "Fail"}
+        </h3>
+      </div>
+      <div className="col-md-3">
+        <h5>Result Date:</h5>
+        <h5 className="">
+          {viewResult.createdAt
+            ? new Date(viewResult.createdAt).toLocaleDateString("en-GB")
+            : "N/A"}
+        </h5>
+      </div>
+    </div>
+
+    {/* Edit/View Toggle */}
+    <div className="text-center p-3 mx-3 border-top">
+      <button
+        className={`btn btn-lg me-2 ${
+          editMode ? "btn-secondary" : "btn-primary"
+        }`}
+        onClick={() => setEditMode(!editMode)}
+      >
+        {editMode ? "👁️ View Mode" : "✏️ Edit Mode"}
+      </button>
+      {editMode && (
+        <button
+          className="btn btn-success btn-lg"
+          onClick={saveAllChanges}
+        >
+          💾 Save All Changes
+        </button>
       )}
+    </div>
+  </Card>
+)}
+
     </div>
   );
 }

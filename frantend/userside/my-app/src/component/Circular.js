@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from "react";
+// src/pages/user/Circular.jsx
+import React, { useEffect, useState } from "react";
 import { Card, Button } from "react-bootstrap";
 
-export default function Circular({ loggedUser, setError }) {
-  // At the top of your component
-const API_URL = process.env.REACT_APP_API_URL;
+export default function Circular({ setError }) {
+  const API_URL = process.env.REACT_APP_API_URL; // https://site.com/api
+  const BASE_URL = API_URL.replace("/api", ""); // https://site.com
+
   const [circulars, setCirculars] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchCirculars = async () => {
     setLoading(true);
     try {
-      // In fetchCirculars:
-const res = await fetch(`${API_URL}/circular`);
+      const res = await fetch(`${API_URL}/circular`);
       if (!res.ok) throw new Error("Failed to fetch circulars");
       const data = await res.json();
-      setCirculars(data);
-    } catch {
-      setError("Failed to load circulars");
+      setCirculars(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      setError?.("Failed to load circulars");
     } finally {
       setLoading(false);
     }
@@ -36,33 +38,31 @@ const res = await fetch(`${API_URL}/circular`);
       </div>
 
       {circulars.length > 0 ? (
-        circulars.map((circular) => (
-          <Card key={circular._id} className="mb-3 p-4 shadow-sm">
-            <h5>{circular.title}</h5>
+        circulars.map((c) => (
+          <Card key={c._id} className="mb-3 p-4 shadow-sm">
+            <h5>{c.title}</h5>
 
-            {/* ✅ Upload Date */}
             <p className="text-muted mb-1">
               <small>
-                Uploaded on :{" "}
-                {circular.createdAt
-                  ? new Date(circular.createdAt).toLocaleDateString("en-GB")
+                Uploaded on:{" "}
+                {c.createdAt
+                  ? new Date(c.createdAt).toLocaleDateString("en-GB")
                   : "N/A"}
               </small>
             </p>
 
-            <p>{circular.description}</p>
+            <p>{c.description}</p>
 
-            {/* ✅ View PDF */}
-           {circular.pdf && (
-  <a
-    href={`${API_URL}${circular.pdf}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="btn btn-sm btn-primary"
-  >
-    📄 View Circular
-  </a>
-)}
+            {c.pdf && (
+              <a
+                href={`${BASE_URL}${c.pdf}`}   // ✅ FIXED
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-sm btn-primary"
+              >
+                📄 View Circular
+              </a>
+            )}
           </Card>
         ))
       ) : (
