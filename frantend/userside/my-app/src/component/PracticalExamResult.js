@@ -58,7 +58,7 @@ export default function PracticalExamResult({ loggedUser, setError }) {
       <Card className="p-4 shadow">
         <div className="d-flex justify-content-between mb-3">
           <h4>🔧 Practical Exam Results</h4>
-          <Button onClick={fetchPracticalResults}>🔄 Refresh</Button>
+          {/* <Button onClick={fetchPracticalResults}>🔄 Refresh</Button> */}
         </div>
 
         {loading ? (

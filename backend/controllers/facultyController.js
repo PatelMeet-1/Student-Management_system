@@ -225,9 +225,9 @@ exports.sendResetOTPEmail = async (req, res) => {
   }
 };
 
-// =================================================
+
 // ============== RESET PASSWORD ===================
-// =================================================
+
 exports.verifyOTPAndResetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -276,9 +276,9 @@ exports.verifyOTPAndResetPassword = async (req, res) => {
   }
 };
 
-// =================================================
+
 // ================= CREATE ========================
-// =================================================
+
 exports.createFaculty = async (req, res) => {
   try {
     const { name, contact, email, course, password } = req.body;
@@ -320,9 +320,9 @@ exports.createFaculty = async (req, res) => {
   }
 };
 
-// =================================================
+
 // ================= READ ==========================
-// =================================================
+
 exports.getFaculties = async (req, res) => {
   try {
     const faculties = await Faculty.find()
@@ -338,9 +338,9 @@ exports.getFaculties = async (req, res) => {
   }
 };
 
-// =================================================
+
 // ================= UPDATE ========================
-// =================================================
+
 exports.updateFaculty = async (req, res) => {
   try {
     const { id } = req.params;
@@ -367,9 +367,9 @@ exports.updateFaculty = async (req, res) => {
   }
 };
 
-// =================================================
+
 // ================= DELETE ========================
-// =================================================
+
 exports.deleteFaculty = async (req, res) => {
   try {
     await Faculty.findByIdAndDelete(req.params.id);

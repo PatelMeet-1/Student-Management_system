@@ -827,14 +827,14 @@ export default function MarksManager({
         </p>
       </div>
       <Button 
-        variant="secondary" 
+        variant="danger" 
         onClick={() => {
           setViewResult(null);
           setEditMode(false);
           setEditingSubjects([]);
         }}
       >
-        ← Back to List
+       X 
       </Button>
     </div>
 

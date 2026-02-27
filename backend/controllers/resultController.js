@@ -150,7 +150,7 @@ const addOrUpdateResult = async (req, res) => {
   }
 };
 
-/* ================= 🔥 SUPER SMART REMEDIAL - 1/2/3 FAIL MAGIC ================= */
+/* =================SUPER SMART REMEDIAL - 1/2/3 FAIL MAGIC ================= */
 const smartRemedial = async (req, res) => {
   try {
     console.log("🔥 SUPER SMART REMEDIAL called:", req.body);

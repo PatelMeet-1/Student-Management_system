@@ -480,11 +480,11 @@ const handleDepartmentFilter = (e) => {
             </p>
           </div>
           <Button 
-            variant="secondary" 
+            variant="danger" 
             onClick={closeResult}
-            className="no-print"
+            className="no-print mb-5"
           >
-            ← Back to List
+            X
           </Button>
         </div>
 
@@ -502,7 +502,7 @@ const handleDepartmentFilter = (e) => {
         </div>
 
         {/* Summary Section - EXACT FORMAT */}
-        {(() => {
+        {/* {(() => {
           const calc = calculateResult(viewResult);
           return (
             <div className="row text-center p-4 bg-gradient border rounded mb-4" 
@@ -531,7 +531,7 @@ const handleDepartmentFilter = (e) => {
               </div>
             </div>
           );
-        })()}
+        })()} */}
 
         {/* Subjects Tables - EXACT SAME FORMAT */}
         {["internalSubjects", "practicalSubjects", "universitySubjects"].map((key) => {

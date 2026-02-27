@@ -64,9 +64,7 @@ export default function InternalExamResult({ loggedUser, setError }) {
       <Card className="p-4 shadow">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4>📚 Internal Exam Results</h4>
-          <Button variant="outline-primary" onClick={fetchInternalResults}>
-            🔄 Refresh
-          </Button>
+         
         </div>
 
         {loading ? (
