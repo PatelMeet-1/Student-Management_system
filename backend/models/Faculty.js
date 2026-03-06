@@ -28,18 +28,12 @@ const facultySchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false, // 🔥 PERFECT
+      select: false, // 🔥 IMPORTANT
     },
 
-    // ✅ OTP fields (ALREADY PRESENT ✅)
+    // ✅ OTP fields (MATCH CONTROLLER + DB)
     otp: String,
     otpExpiry: Date,
-    
-    // 🚨 MISSING FIELD - YE ADD KARO 👇
-    isVerified: {
-      type: Boolean,
-      default: false
-    }
   },
   { timestamps: true }
 );
