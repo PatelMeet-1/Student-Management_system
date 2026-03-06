@@ -1,19 +1,9 @@
 const Faculty = require("../models/Faculty");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const { Resend } = require('resend');  // ✅ RESEND ADD
 
-// ================= EMAIL CONFIG =================
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-const generateOTP = () =>
-  Math.floor(100000 + Math.random() * 900000).toString();
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 // =================================================
 // =================== LOGIN =======================
@@ -103,11 +93,14 @@ exports.sendResetOTPEmail = async (req, res) => {
     faculty.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min
     await faculty.save();
 
-    await transporter.sendMail({
-  from: process.env.EMAIL_USER,
-  to: cleanEmail,
-  subject: "🔐 Faculty Password Reset - Your OTP Code",
-  html: `
+    // ✅ RESEND REPLACE NODOMAILER
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    
+    await resend.emails.send({
+      from: 'Faculty Portal <onboarding@resend.dev>',
+      to: [cleanEmail],
+      subject: "🔐 Faculty Password Reset - Your OTP Code",
+      html: `
 <!DOCTYPE html>
 <html>
 <head>
@@ -117,13 +110,11 @@ exports.sendResetOTPEmail = async (req, res) => {
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa; line-height: 1.6;">
   
-  <!-- Main Container -->
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="padding: 20px 0;">
     <tr>
       <td align="center">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden;">
           
-          <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px 40px; text-align: center;">
               <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
@@ -135,11 +126,8 @@ exports.sendResetOTPEmail = async (req, res) => {
             </td>
           </tr>
 
-          <!-- Content -->
           <tr>
             <td style="padding: 40px;">
-              
-              <!-- Greeting -->
               <div style="text-align: center; margin-bottom: 30px;">
                 <h2 style="margin: 0 0 10px 0; color: #2d3748; font-size: 24px; font-weight: 600;">
                   Your OTP Code
@@ -149,7 +137,6 @@ exports.sendResetOTPEmail = async (req, res) => {
                 </p>
               </div>
 
-              <!-- OTP Display -->
               <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                           margin: 30px 0; padding: 30px 20px; 
                           border-radius: 16px; text-align: center; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);">
@@ -161,7 +148,6 @@ exports.sendResetOTPEmail = async (req, res) => {
                 </div>
               </div>
 
-              <!-- Instructions -->
               <div style="background-color: #f8f9ff; border-left: 5px solid #667eea; 
                           padding: 25px; margin: 30px 0; border-radius: 8px;">
                 <h3 style="margin: 0 0 12px 0; color: #2d3748; font-size: 18px; font-weight: 600;">
@@ -174,7 +160,6 @@ exports.sendResetOTPEmail = async (req, res) => {
                 </ul>
               </div>
 
-              <!-- Security Notice -->
               <div style="background-color: #fff5f5; border-left: 5px solid #e53e3e; 
                           padding: 20px; margin: 25px 0; border-radius: 8px;">
                 <p style="margin: 0; color: #c53030; font-weight: 500; font-size: 15px;">
@@ -182,11 +167,9 @@ exports.sendResetOTPEmail = async (req, res) => {
                   please ignore this email. Your account is safe.
                 </p>
               </div>
-
             </td>
           </tr>
 
-          <!-- Footer -->
           <tr>
             <td style="background-color: #f8fafc; padding: 30px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
               <p style="margin: 0 0 15px 0; color: #4a5568; font-size: 14px;">
@@ -200,18 +183,16 @@ exports.sendResetOTPEmail = async (req, res) => {
               </p>
             </td>
           </tr>
-
         </table>
       </td>
     </tr>
   </table>
-
 </body>
 </html>
-  `,
-});
+      `,
+    });
 
-
+    console.log('✅ Faculty OTP sent via Resend!');
     res.json({
       success: true,
       message: "OTP sent to your email",
@@ -225,9 +206,7 @@ exports.sendResetOTPEmail = async (req, res) => {
   }
 };
 
-
 // ============== RESET PASSWORD ===================
-
 exports.verifyOTPAndResetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -276,9 +255,7 @@ exports.verifyOTPAndResetPassword = async (req, res) => {
   }
 };
 
-
 // ================= CREATE ========================
-
 exports.createFaculty = async (req, res) => {
   try {
     const { name, contact, email, course, password } = req.body;
@@ -320,9 +297,7 @@ exports.createFaculty = async (req, res) => {
   }
 };
 
-
 // ================= READ ==========================
-
 exports.getFaculties = async (req, res) => {
   try {
     const faculties = await Faculty.find()
@@ -338,9 +313,7 @@ exports.getFaculties = async (req, res) => {
   }
 };
 
-
 // ================= UPDATE ========================
-
 exports.updateFaculty = async (req, res) => {
   try {
     const { id } = req.params;
@@ -367,9 +340,7 @@ exports.updateFaculty = async (req, res) => {
   }
 };
 
-
 // ================= DELETE ========================
-
 exports.deleteFaculty = async (req, res) => {
   try {
     await Faculty.findByIdAndDelete(req.params.id);
