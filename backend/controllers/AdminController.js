@@ -61,10 +61,13 @@ exports.sendOtp = async (req, res) => {
     admin.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
     await admin.save();
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    });
+  const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
    await transporter.sendMail({
   from: `"🔒 Admin Support" <${process.env.EMAIL_USER}>`,
