@@ -1,4 +1,3 @@
-// controllers/AdminController.js - ✅ 100% COMPLETE & WORKING
 const Admin = require("../models/Admin");
 const jwt = require("jsonwebtoken");
 const { Resend } = require('resend');
@@ -63,8 +62,8 @@ exports.sendOtp = async (req, res) => {
     admin.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
     await admin.save();
 
-    // ✅ RESEND (NO MORE GMAIL SMTP ERRORS!)
-    await resend.emails.send({
+    // RESEND (NO MORE GMAIL SMTP ERRORS!)
+    await resend.emails.send({  
       from: 'Admin Support <onboarding@resend.dev>',
       to: [email],
       subject: "🔐 Account Recovery - Your Secure OTP Code",

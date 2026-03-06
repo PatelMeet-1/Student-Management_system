@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
-const { Resend } = require('resend');  // ✅ RESEND REPLACE NODOMAILER
+const { Resend } = require('resend');  
 
 // ---------------- GET ALL USERS ----------------
 exports.getUsers = async (req, res) => {
