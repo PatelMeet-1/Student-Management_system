@@ -97,7 +97,7 @@ exports.sendResetOTPEmail = async (req, res) => {
     const resend = new Resend(process.env.RESEND_API_KEY);
     
     await resend.emails.send({
-      from: 'Faculty Portal <onboarding@resend.dev>',
+  from: '🎓 Student Portal <onboarding@resend.dev>',
       to: [cleanEmail],
       subject: "🔐 Faculty Password Reset - Your OTP Code",
       html: `
