@@ -1,24 +1,19 @@
+// routes/facultyRoutes.js - FIXED TO MATCH YOUR CONTROLLER
 const express = require("express");
 const router = express.Router();
-const {
-  createFaculty,
-  loginFaculty,
-  sendOtp,           
-  resetPassword,     
-  getFaculties,
-  updateFaculty,
-  deleteFaculty
-} = require("../controllers/FacultyController"); // ✅ Destructuring
+const facultyController = require("../controllers/facultyController");
 
-// Public routes
-router.post("/login", loginFaculty);           // ✅ Admin style
-router.post("/send-otp", sendOtp);             // ✅ नया Resend OTP
-router.post("/reset-password", resetPassword); // ✅ नया Resend reset
+console.log("✅ Faculty Controller loaded:", Object.keys(facultyController));
+
+// Public routes - MATCH YOUR ACTUAL CONTROLLER METHODS
+router.post("/login/faculty", facultyController.loginFaculty);
+router.post("/forgot-password", facultyController.sendOtp);           // ← FIXED
+router.post("/reset-password-otp", facultyController.resetPassword);  // ← FIXED
 
 // Admin routes
-router.post("/create", createFaculty);
-router.get("/", getFaculties);
-router.put("/:id", updateFaculty);
-router.delete("/:id", deleteFaculty);
+router.post("/", facultyController.createFaculty);
+router.get("/", facultyController.getFaculties);
+router.put("/:id", facultyController.updateFaculty);
+router.delete("/:id", facultyController.deleteFaculty);
 
 module.exports = router;
