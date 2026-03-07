@@ -1,3 +1,4 @@
+// controllers/AdminController.js
 const Admin = require("../models/Admin");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
@@ -248,7 +249,7 @@ exports.resetUsernamePassword = async (req, res) => {
     }
 
     // Always change password
-    admin.password = newPassword; // pre-save hook will hash
+    admin.password = newPassword;
     admin.otp = null;
     admin.otpExpiry = null;
 
