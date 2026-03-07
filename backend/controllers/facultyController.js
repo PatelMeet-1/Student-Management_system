@@ -105,16 +105,11 @@ exports.sendResetOTPEmail = async (req, res) => {
 
     // 📧 SEND EMAIL USING RESEND
     await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: [cleanEmail],
-      subject: "🔐 Faculty Password Reset OTP",
-      html: `
-        <h2>Password Reset OTP</h2>
-        <p>Your OTP code is:</p>
-        <h1>${otp}</h1>
-        <p>This code will expire in 10 minutes.</p>
-      `,
-    });
+  from: "onboarding@resend.dev",
+  to: [cleanEmail],
+  subject: "Faculty Password Reset OTP",
+  html: `<h2>Your OTP is: ${otp}</h2>`
+});
 
     res.json({
       success: true,
