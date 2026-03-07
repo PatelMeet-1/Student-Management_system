@@ -28,9 +28,10 @@ const facultySchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false,
+      select: false, // 🔥 IMPORTANT
     },
-    // OTP fields (matches controller)
+
+    // ✅ OTP fields (MATCH CONTROLLER + DB)
     otp: String,
     otpExpiry: Date,
   },
