@@ -1,20 +1,12 @@
-// controllers/facultyController.js
+// controllers/facultyController.js - FULL WORKING CODE
 const Faculty = require("../models/Faculty");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-// ================= EMAIL CONFIG - FIXED ✅ =================
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const generateOTP = () =>
-  Math.floor(100000 + Math.random() * 900000).toString();
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 // =================================================
 // =================== LOGIN =======================
@@ -77,7 +69,7 @@ exports.loginFaculty = async (req, res) => {
 };
 
 // =================================================
-// ================= SEND FIRST OTP (Forgot Pass) ===
+// ================= SEND FIRST OTP ================
 // =================================================
 exports.sendResetOTPEmail = async (req, res) => {
   try {
@@ -104,17 +96,26 @@ exports.sendResetOTPEmail = async (req, res) => {
     faculty.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min
     await faculty.save();
 
-    // Simple HTML email (same as your original)
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: cleanEmail,
+    console.log('🔑 RESEND_API_KEY LOADED:', !!process.env.RESEND_API_KEY);
+
+    const { data, error } = await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: [cleanEmail],
       subject: "🔐 Faculty Password Reset - Your OTP Code",
       html: `
-        <h1 style="color: #667eea;">Your OTP: ${otp}</h1>
-        <p>This code expires in 10 minutes. Do not share this code with anyone.</p>
+        <h1 style="color: #667eea; font-size: 48px; font-weight: bold;">${otp}</h1>
+        <p>This code expires in <strong>10 minutes</strong>. Do not share this code.</p>
+        <hr style="border: 1px solid #eee;">
+        <p><small>Faculty Portal Team</small></p>
       `,
     });
 
+    if (error) {
+      console.error('❌ Resend error:', error);
+      return res.status(500).json({ success: false, message: 'Failed to send OTP' });
+    }
+
+    console.log(`✅ OTP sent via Resend to: ${cleanEmail}`);
     res.json({
       success: true,
       message: "OTP sent to your email",
@@ -129,7 +130,7 @@ exports.sendResetOTPEmail = async (req, res) => {
 };
 
 // =================================================
-// ================= RESEND OTP - NEW FUNCTION 🔥 ===
+// ================= RESEND OTP ====================
 // =================================================
 exports.resendOtp = async (req, res) => {
   try {
@@ -151,24 +152,32 @@ exports.resendOtp = async (req, res) => {
       });
     }
 
-    // Generate NEW OTP
     const newOtp = generateOTP();
     faculty.otp = newOtp;
     faculty.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 min
     await faculty.save();
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: cleanEmail,
-      subject: "🔄 NEW OTP - Faculty Portal (Resend)",
+    console.log('🔑 RESEND_API_KEY LOADED:', !!process.env.RESEND_API_KEY);
+
+    const { data, error } = await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: [cleanEmail],
+      subject: "🔄 NEW Faculty OTP - Resend Request",
       html: `
-        <h1 style="color: #28a745;">New OTP: ${newOtp}</h1>
-        <p>You requested a new verification code.</p>
-        <p><strong>Valid for 5 minutes only!</strong></p>
+        <h1 style="color: #28a745; font-size: 48px; font-weight: bold;">${newOtp}</h1>
+        <p>You requested a <strong>new verification code</strong>.</p>
+        <p>Valid for <strong>5 minutes only</strong>.</p>
+        <hr style="border: 1px solid #eee;">
+        <p><small>Faculty Portal Team</small></p>
       `,
     });
 
-    console.log(`✅ NEW OTP sent to: ${cleanEmail}`);
+    if (error) {
+      console.error('❌ Resend error:', error);
+      return res.status(500).json({ success: false, message: 'Failed to resend OTP' });
+    }
+
+    console.log(`✅ NEW OTP sent via Resend to: ${cleanEmail}`);
     res.json({
       success: true,
       message: "New OTP sent successfully to your email!",
@@ -177,7 +186,7 @@ exports.resendOtp = async (req, res) => {
     console.error("RESEND OTP ERROR:", err);
     res.status(500).json({
       success: false,
-      message: "Failed to resend OTP. Please try again.",
+      message: "Failed to resend OTP",
     });
   }
 };
@@ -217,7 +226,6 @@ exports.verifyOTPAndResetPassword = async (req, res) => {
       });
     }
 
-    // Reset password
     faculty.password = await bcrypt.hash(newPassword, 12);
     faculty.otp = null;
     faculty.otpExpiry = null;

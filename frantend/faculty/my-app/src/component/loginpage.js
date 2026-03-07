@@ -71,6 +71,26 @@ localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
     }
   };
 
+  // Naya function add karo - handleSendOTP ke neeche
+const handleResendOTP = async () => {
+  const cleanEmail = fpEmail.trim().toLowerCase();
+  setError(""); 
+  setSuccess(""); 
+  setLoading(true);
+
+  try {
+    const res = await axios.post(`${API_URL}/faculty/resend-otp`, {  // ← Naya endpoint
+      email: cleanEmail,
+    });
+    setSuccess("✅ New OTP sent! Check your email.");
+  } catch (err) {
+    setError(err.response?.data?.message || "Resend failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     
@@ -248,9 +268,14 @@ localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
             </Button>
 
             <div className="d-grid gap-2">
-              <Button variant="outline-primary" size="sm" onClick={handleSendOTP} disabled={loading}>
-                🔄 Resend OTP
-              </Button>
+              <Button 
+  variant="outline-primary" 
+  size="sm" 
+  onClick={handleResendOTP}  // ← Naya function
+  disabled={loading}
+>
+  🔄 Resend OTP
+</Button>
               <Button variant="outline-secondary" size="sm" onClick={() => setStep(0)}>
                 ← Back to Login
               </Button>
