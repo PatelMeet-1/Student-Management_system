@@ -18,6 +18,7 @@ exports.loginFaculty = async (req, res) => {
     const { email, password } = req.body;
 
     const cleanEmail = email?.toLowerCase().trim();
+    console.log("OTP REQUEST EMAIL:", cleanEmail);
     const cleanPassword = password?.trim();
 
     if (!cleanEmail || !cleanPassword) {
