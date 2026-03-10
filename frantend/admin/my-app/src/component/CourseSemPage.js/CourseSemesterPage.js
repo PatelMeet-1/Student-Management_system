@@ -62,7 +62,7 @@ export default function CourseSemesterPage() {
     if (!semesterNumber || semesterSubjects.length === 0) return;
 
     const semester = {
-      semesterName: `Sem ${semesterNumber}`,
+      semesterName: `Semester${semesterNumber}`,
       subjects: semesterSubjects
     };
 
