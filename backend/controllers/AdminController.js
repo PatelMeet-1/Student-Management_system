@@ -1,14 +1,7 @@
-// controllers/AdminController.js - COMPLETE UPDATED FILE
+// controllers/AdminController.js
 const Admin = require("../models/Admin");
-const Faculty = require("../models/Faculty");  // ADD YE LINE
-const User = require("../models/User");        // ADD YE LINE
 const jwt = require("jsonwebtoken");
-const { Resend } = require("resend");          // ✅ RESEND ADD
 const nodemailer = require("nodemailer");
-
-const resend = new Resend(process.env.RESEND_API_KEY);  // ✅ RESEND INSTANCE
-
-const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 /* ================= CREATE ADMIN ================= */
 exports.createAdmin = async (req, res) => {
@@ -54,82 +47,7 @@ exports.loginAdmin = async (req, res) => {
   }
 };
 
-/* ================= ADD FACULTY BY ADMIN (NEW) ✅ */
-exports.addFaculty = async (req, res) => {
-  try {
-    const { name, email, department, phone } = req.body;
-
-    const existing = await Faculty.findOne({ email });
-    if (existing) return res.json({ success: false, message: "Email already exists" });
-
-    const otp = generateOTP();
-    const newFaculty = new Faculty({
-      name, email, department, phone,
-      otp,
-      otpExpiry: Date.now() + 10 * 60 * 1000  // 10 min
-    });
-
-    await newFaculty.save();
-
-    // 🔥 RESEND EMAIL (Gmail se better!)
-    await resend.emails.send({
-      from: 'resend@resend.dev',
-      to: [email],
-      subject: `Welcome ${name} - Faculty OTP`,
-      html: `
-        <h2>🎓 Welcome Faculty ${name}!</h2>
-        <h3 style="color:#2563eb">Your OTP: <b>${otp}</b></h3>
-        <p>Valid for 10 minutes only</p>
-        <p>Login: yourapp.com/faculty</p>
-      `
-    });
-
-    console.log(`✅ FACULTY ADDED: ${name} | OTP: ${otp} | ${email}`);
-    res.json({ success: true, message: `Faculty ${name} added! OTP sent to ${email}` });
-
-  } catch (err) {
-    console.error('Faculty Add Error:', err);
-    res.status(500).json({ error: err.message });
-  }
-};
-
-/* ================= ADD USER BY ADMIN (NEW) ✅ */
-exports.addUser = async (req, res) => {
-  try {
-    const { name, email, rollNo, course } = req.body;
-
-    const existing = await User.findOne({ email });
-    if (existing) return res.json({ success: false, message: "Email already exists" });
-
-    const otp = generateOTP();
-    const newUser = new User({
-      name, email, rollNo, course,
-      otp,
-      otpExpiry: Date.now() + 10 * 60 * 1000
-    });
-
-    await newUser.save();
-
-    await resend.emails.send({
-      from: 'resend@resend.dev',
-      to: [email],
-      subject: `Welcome ${name} - Student OTP`,
-      html: `
-        <h2>🎓 Welcome Student ${name}!</h2>
-        <h3 style="color:#10b981">Your OTP: <b>${otp}</b></h3>
-        <p>Valid for 10 minutes only</p>
-      `
-    });
-
-    console.log(`✅ USER ADDED: ${name} | OTP: ${otp} | ${email}`);
-    res.json({ success: true, message: `Student ${name} added! OTP sent` });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-/* ================= SEND OTP (RESEND VERSION - UPDATED) ✅ */
+/* ================= SEND OTP ================= */
 exports.sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -137,30 +55,103 @@ exports.sendOtp = async (req, res) => {
     const admin = await Admin.findOne({ email });
     if (!admin) return res.status(404).json({ message: "Email not registered" });
 
-    const otp = generateOTP();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     admin.otp = otp;
     admin.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
     await admin.save();
 
-    // ✅ RESEND instead of Nodemailer
-    await resend.emails.send({
-      from: 'resend@resend.dev',
-      to: [email],
-      subject: "Admin Recovery - Your OTP Code",
-      html: `
-        <h2>🔐 Admin Recovery OTP</h2>
-        <div style="font-size:32px;font-weight:bold;letter-spacing:6px;background:#2563eb;color:white;padding:15px;border-radius:8px">
-          ${otp}
-        </div>
-        <p>Valid for 5 minutes only</p>
-      `
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
     });
 
-    console.log(`🔥 ADMIN OTP: ${otp} → ${email}`);
-    res.json({ message: "OTP sent successfully" });
+ await transporter.sendMail({
+  from: `🔒 Admin Support <${process.env.EMAIL_USER}>`,
+  to: email,
+  subject: "Account Recovery - Your OTP Code",
+  html: `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Account Recovery OTP</title>
+</head>
 
+<body style="margin:0;padding:20px;background:#CCBEB1;font-family:Arial, sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center">
+
+<table width="500" cellpadding="0" cellspacing="0" style="background:#FFDBBB;border-radius:10px;overflow:hidden">
+
+<!-- HEADER -->
+<tr>
+<td style="background:#664930;color:white;padding:20px;text-align:center">
+<h2 style="margin:0">🔐 Account Recovery</h2>
+<p style="margin:5px 0 0 0;font-size:14px">Your One-Time Password</p>
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:30px;text-align:center">
+
+<p style="color:#664930;font-size:16px;margin-bottom:20px">
+Use the OTP below to recover your account.
+</p>
+
+<!-- OTP BOX -->
+<div style="
+font-size:32px;
+font-weight:bold;
+letter-spacing:6px;
+background:#997E67;
+color:white;
+padding:15px 25px;
+display:inline-block;
+border-radius:8px;
+margin-bottom:20px;
+">
+${otp}
+</div>
+
+<p style="color:#664930;font-size:14px">
+This OTP is valid for <b>5 minutes only</b>.
+</p>
+
+</td>
+</tr>
+
+<!-- SUPPORT TEAM -->
+<tr>
+<td style="background:#664930;color:white;text-align:center;padding:20px;font-size:14px">
+
+<b>Support Team</b><br><br>
+
+Name: Meet Patel <br>
+Email: patelmeetbhai6333@gmail.com <br>
+Contact: +91 9328407114
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`
+});
+
+
+    res.json({ message: "OTP sent successfully" });
   } catch (err) {
-    console.error('Resend Error:', err);
+    console.error(err);
     res.status(500).json({ error: "OTP sending failed" });
   }
 };
@@ -179,12 +170,14 @@ exports.resetUsernamePassword = async (req, res) => {
     if (admin.otp !== String(otp) || admin.otpExpiry < Date.now())
       return res.status(400).json({ message: "Invalid or expired OTP" });
 
+    // ✅ Only change username if newUsername is provided
     if (newUsername) {
       const usernameExists = await Admin.findOne({ username: newUsername });
       if (usernameExists) return res.status(400).json({ message: "Username already taken" });
       admin.username = newUsername;
     }
 
+    // Always change password
     admin.password = newPassword;
     admin.otp = null;
     admin.otpExpiry = null;
