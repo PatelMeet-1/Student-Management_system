@@ -1,26 +1,16 @@
-
+// controllers/FacultyController.js - FULL RESEND VERSION
 const Faculty = require("../models/Faculty");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");  // ✅ RESEND ADDED
 
-// ================= EMAIL CONFIG =================
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-const generateOTP = () =>
-  Math.floor(100000 + Math.random() * 900000).toString();
-
+const resend = new Resend(process.env.RESEND_API_KEY);  // ✅ RESEND INSTANCE
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 // Bulk create faculties
 exports.createFacultiesBulk = async (req, res) => {
   try {
-    const faculties = req.body; // expect an array of objects
+    const faculties = req.body;
 
     if (!Array.isArray(faculties) || faculties.length === 0) {
       return res.status(400).json({
@@ -29,7 +19,6 @@ exports.createFacultiesBulk = async (req, res) => {
       });
     }
 
-    // Prepare array with hashed passwords
     const facultyDocs = await Promise.all(
       faculties.map(async (f) => {
         const { name, contact, email, course, password } = f;
@@ -129,7 +118,7 @@ exports.loginFaculty = async (req, res) => {
 };
 
 // =================================================
-// ================= SEND OTP ======================
+// ================= SEND OTP (RESEND) ==============
 // =================================================
 exports.sendResetOTPEmail = async (req, res) => {
   try {
@@ -156,93 +145,79 @@ exports.sendResetOTPEmail = async (req, res) => {
     faculty.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min
     await faculty.save();
 
-  await transporter.sendMail({
-  from: process.env.EMAIL_USER,
-  to: cleanEmail,
-  subject: "Faculty Password Reset - Your OTP Code",
-  html: `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Faculty Password Reset</title>
-</head>
+    // 🔥 RESEND EMAIL (Render pe 100% working!)
+    await resend.emails.send({
+      from: 'resend@resend.dev',
+      to: [cleanEmail],
+      subject: "🔐 Faculty Password Reset - Your OTP Code",
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Faculty Password Reset</title>
+        </head>
+        <body style="margin:0;padding:20px;background:#f4f4f4;font-family:Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="center">
+                <table width="500" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden">
+                  <!-- HEADER -->
+                  <tr>
+                    <td style="background:#10b981;color:white;padding:20px;text-align:center">
+                      <h2 style="margin:0">🔐 Faculty Password Reset</h2>
+                    </td>
+                  </tr>
+                  <!-- CONTENT -->
+                  <tr>
+                    <td style="padding:30px;text-align:center">
+                      <p style="font-size:16px;color:#333;margin-bottom:20px">
+                        Use the OTP below to reset your password.
+                      </p>
+                      <!-- OTP BOX -->
+                      <div style="
+                        font-size:32px;
+                        font-weight:bold;
+                        letter-spacing:6px;
+                        background:#10b981;
+                        color:white;
+                        padding:15px 25px;
+                        display:inline-block;
+                        border-radius:6px;
+                        margin-bottom:20px;
+                      ">
+                        ${otp}
+                      </div>
+                      <p style="font-size:14px;color:#555">
+                        This OTP is valid for <b>10 minutes only</b>.
+                      </p>
+                    </td>
+                  </tr>
+                  <!-- SUPPORT -->
+                  <tr>
+                    <td style="background:#333;color:white;text-align:center;padding:20px;font-size:14px">
+                      <b>Support Team</b><br><br>
+                      Name: Meet Patel <br>
+                      Email: patelmeetbhai6333@gmail.com <br>
+                      Contact: +91 9328407114
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    });
 
-<body style="margin:0;padding:20px;background:#f4f4f4;font-family:Arial, sans-serif;">
-
-<table width="100%" cellpadding="0" cellspacing="0">
-<tr>
-<td align="center">
-
-<table width="500" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden">
-
-<!-- HEADER -->
-<tr>
-<td style="background:#333;color:white;padding:20px;text-align:center">
-<h2 style="margin:0">🔐 Faculty Password Reset</h2>
-</td>
-</tr>
-
-<!-- CONTENT -->
-<tr>
-<td style="padding:30px;text-align:center">
-
-<p style="font-size:16px;color:#333;margin-bottom:20px">
-Use the OTP below to reset your password.
-</p>
-
-<!-- OTP BOX -->
-<div style="
-font-size:32px;
-font-weight:bold;
-letter-spacing:6px;
-background:#eeeeee;
-padding:15px 25px;
-display:inline-block;
-border-radius:6px;
-margin-bottom:20px;
-">
-${otp}
-</div>
-
-<p style="font-size:14px;color:#555">
-This OTP is valid for <b>10 minutes only</b>.
-</p>
-
-</td>
-</tr>
-
-<!-- SUPPORT TEAM -->
-<tr>
-<td style="background:#333;color:white;text-align:center;padding:20px;font-size:14px">
-
-<b>Support Team</b><br><br>
-
-Name: Meet Patel <br>
-Email: patelmeetbhai6333@gmail.com <br>
-Contact: +91 9328407114
-
-</td>
-</tr>
-
-</table>
-
-</td>
-</tr>
-</table>
-
-</body>
-</html>
-`
-});
-
-
+    console.log(`🔥 FACULTY OTP: ${otp} → ${cleanEmail}`);
     res.json({
       success: true,
-      message: "OTP sent to your email",
+      message: "OTP sent to your email!",
     });
   } catch (err) {
-    console.error("OTP ERROR:", err);
+    console.error("RESEND OTP ERROR:", err);
     res.status(500).json({
       success: false,
       message: "Failed to send OTP",
@@ -250,9 +225,7 @@ Contact: +91 9328407114
   }
 };
 
-
 // ============== RESET PASSWORD ===================
-
 exports.verifyOTPAndResetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -301,9 +274,7 @@ exports.verifyOTPAndResetPassword = async (req, res) => {
   }
 };
 
-
 // ================= CREATE ========================
-
 exports.createFaculty = async (req, res) => {
   try {
     const { name, contact, email, course, password } = req.body;
@@ -345,9 +316,7 @@ exports.createFaculty = async (req, res) => {
   }
 };
 
-
 // ================= READ ==========================
-
 exports.getFaculties = async (req, res) => {
   try {
     const faculties = await Faculty.find()
@@ -363,9 +332,7 @@ exports.getFaculties = async (req, res) => {
   }
 };
 
-
 // ================= UPDATE ========================
-
 exports.updateFaculty = async (req, res) => {
   try {
     const { id } = req.params;
@@ -392,9 +359,7 @@ exports.updateFaculty = async (req, res) => {
   }
 };
 
-
 // ================= DELETE ========================
-
 exports.deleteFaculty = async (req, res) => {
   try {
     await Faculty.findByIdAndDelete(req.params.id);
