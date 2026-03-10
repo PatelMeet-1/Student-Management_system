@@ -15,6 +15,41 @@ exports.getUsers = async (req, res) => {
   }
 };
 
+// ---------------- CREATE USERS IN BULK ----------------
+exports.createUsersBulk = async (req, res) => {
+  try {
+    const usersArray = req.body; // Expecting an array of student objects
+
+    // Hash passwords for each user manually before insertMany
+    const hashedUsers = await Promise.all(
+      usersArray.map(async (user) => {
+        if (user.password) {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+        return user;
+      })
+    );
+
+    const createdUsers = await User.insertMany(hashedUsers);
+
+    const responseUsers = createdUsers.map((u) => {
+      const obj = u.toObject();
+      delete obj.password; // remove password from response
+      return obj;
+    });
+
+    res.status(201).json({
+      success: true,
+      message: `${createdUsers.length} students added successfully`,
+      data: responseUsers,
+    });
+  } catch (error) {
+    console.error("❌ Bulk creation error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // ---------------- CREATE USER ----------------
 exports.createUser = async (req, res) => {
   try {
@@ -93,183 +128,86 @@ console.log(`📤 OTP for ${email}: ${otp}`);
       },
     });
 
-    await transporter.sendMail({
+   await transporter.sendMail({
   from: `🎓 Student Portal <${process.env.EMAIL_USER}>`,
   to: email,
-  subject: "🔐 Password Reset - Your Secure 6-Digit Code",
+  subject: "Password Reset - Your OTP Code",
   html: `
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Password Reset OTP</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<title>Password Reset OTP</title>
 </head>
-<body style="margin:0;padding:0;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#664930 0%,#997E67 50%,#CCBEB1 100%);min-height:100vh;padding:20px 10px">
-  
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;margin:0 auto">
-    <tr>
-      <td style="padding:10px 0">
-        
-        <!-- 🔥 MAIN HERO CARD -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#FFDBBB;border-radius:28px;box-shadow:0 35px 70px rgba(0,0,0,0.25);overflow:hidden;border:1px solid rgba(255,255,255,0.1)">
-          
-          <!-- ✨ GRADIENT HEADER WITH GLASSMORPHISM -->
-          <tr>
-            <td style="background:linear-gradient(135deg,#997E67 0%,#664930 50%,#CCBEB1 100%);padding:60px 40px;text-align:center;position:relative;overflow:hidden">
-              <!-- Animated particles -->
-              <div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle at 20% 80%,rgba(255,255,255,0.3) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(255,255,255,0.2) 0%,transparent 50%),radial-gradient(circle at 40% 40%,rgba(255,255,255,0.1) 0%,transparent 50%);animation:particles 20s ease-in-out infinite alternate;"></div>
-              <div style="position:absolute;top:20px;right:20px;width:60px;height:60px;background:linear-gradient(45deg,rgba(255,255,255,0.2),rgba(255,255,255,0.05));border-radius:20px;backdrop-filter:blur(10px);"></div>
-              
-              <div style="display:inline-block;width:100px;height:100px;background:linear-gradient(135deg,rgba(255,255,255,0.25),rgba(255,255,255,0.1));border-radius:24px;margin-bottom:25px;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 40px rgba(255,255,255,0.1);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.2)">
-                <span style="font-size:44px">🔐</span>
-              </div>
-              
-              <h1 style="margin:0;font-size:36px;font-weight:800;color:white;letter-spacing:-0.02em;text-shadow:0 4px 20px rgba(0,0,0,0.3)">Secure Reset Code</h1>
-              <p style="margin:15px 0 0 0;color:rgba(255,255,255,0.95);font-size:18px;font-weight:500;letter-spacing:-0.01em">Student Portal Verification</p>
-            </td>
-          </tr>
 
-          <!-- 🔥 OTP CONTAINER - 3D EFFECT -->
-          <tr>
-            <td style="padding:60px 40px;text-align:center">
-              
-              <!-- Welcome message -->
-              <div style="margin-bottom:50px">
-                <h2 style="font-size:28px;font-weight:700;color:#664930;margin:0 0 15px 0;letter-spacing:-0.02em">Your 6-Digit Code</h2>
-                <p style="color:#64748b;font-size:17px;line-height:1.6;margin:0;font-weight:400;max-width:400px;margin:0 auto">
-                  Enter this one-time code in the app to reset your password. 
-                  <strong>Valid for 5 minutes only.</strong>
-                </p>
-              </div>
+<body style="margin:0;padding:20px;background:#CCBEB1;font-family:Arial, sans-serif;">
 
-              <!-- 🔥 MAIN OTP BOX - GLASS + NEON GLOW -->
-              <div style="background:linear-gradient(145deg,#FFDBBB,#CCBEB1);margin:0 auto 50px;padding:0;border-radius:28px;text-align:center;max-width:380px;box-shadow:0 35px 70px rgba(153,126,103,0.15),inset 0 1px 0 rgba(255,255,255,0.8);position:relative;overflow:hidden;border:2px solid rgba(153,126,103,0.2)">
-                
-                <!-- Neon glow effect -->
-                <div style="position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#997E67,#664930,#CCBEB1);border-radius:30px;z-index:-1;animation:glow 2s ease-in-out infinite alternate;filter:blur(8px);opacity:0.7"></div>
-                
-                <!-- Glass inner container -->
-                <div style="background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);padding:50px 40px;border-radius:24px;box-shadow:0 20px 40px rgba(0,0,0,0.1);position:relative;z-index:1;border:3px solid rgba(255,255,255,0.9)">
-                  
-                  <!-- 🔥 ANIMATED OTP DISPLAY -->
-                  <div style="font-size:56px;font-weight:900;letter-spacing:0.1em;color:#664930;text-shadow:0 2px 10px rgba(153,126,103,0.3);font-family:'SF Mono','Courier New',monospace;animation:fadeInUp 1s ease-out;">
-                    ${otp}
-                  </div>
-                  
-                  <!-- Timer indicator -->
-                  <div style="margin-top:25px;padding:12px 24px;background:linear-gradient(135deg,#997E67,#664930);border-radius:50px;display:inline-block;font-size:14px;font-weight:600;color:white;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 8px 25px rgba(153, 126, 103, 0.3)">
-                    Expires in 5:00
-                  </div>
-                  
-                </div>
-              </div>
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center">
 
-              <!-- 🔥 STEP-BY-STEP GUIDE -->
-              <div style="background:linear-gradient(135deg,#FFDBBB,#CCBEB1);border:2px solid #CCBEB1;border-radius:24px;padding:45px;margin:40px 0;position:relative;overflow:hidden">
-                
-                <!-- Decorative badge -->
-                <div style="position:absolute;top:25px;right:25px;background:linear-gradient(135deg,#997E67,#664930);color:white;width:50px;height:50px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;box-shadow:0 8px 25px rgba(153, 126, 103, 0.3)">i</div>
-                
-                <h3 style="margin:0 0 30px 0;color:#664930;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center">
-                  <span style="width:10px;height:10px;background:linear-gradient(135deg,#3b82f6,#60a5fa);border-radius:50%;margin-right:15px;box-shadow:0 0 20px rgba(59,130,246,0.5)"></span>
-                  How to use this code
-                </h3>
-                
-                <!-- Steps grid -->
-                <div style="display:grid;gap:25px;font-size:16px;color:#475569;line-height:1.7;max-width:500px;margin:0 auto">
-                  <div style="display:flex;align-items:flex-start;gap:18px;padding:20px 0;border-bottom:1px solid #e2e8f0">
-                    <div style="width:36px;height:36px;background:linear-gradient(135deg,#997E67,#664930);color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;margin-top:2px;box-shadow:0 6px 20px rgba(153, 126, 103, 0.3)">1</div>
-                    <span>Paste this code in the password reset form on Student Portal</span>
-                  </div>
-                  <div style="display:flex;align-items:flex-start;gap:18px;padding:20px 0;border-bottom:1px solid #e2e8f0">
-                    <div style="width:36px;height:36px;background:linear-gradient(135deg,#CCBEB1,#997E67);color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;margin-top:2px;box-shadow:0 6px 20px rgba(204, 190, 177, 0.3)">2</div>
-                    <span><strong>This code expires in 5 minutes</strong> - enter quickly!</span>
-                  </div>
-                  <div style="display:flex;align-items:flex-start;gap:18px;padding:20px 0">
-                    <div style="width:36px;height:36px;background:linear-gradient(135deg,#FFDBBB,#CCBEB1);color:#664930;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;margin-top:2px;box-shadow:0 6px 20px rgba(255,219,187,0.3)">3</div>
-                    <span>Create strong password (8+ chars, mix of letters + numbers)</span>
-                  </div>
-                </div>
-              </div>
+<table width="500" cellpadding="0" cellspacing="0" style="background:#FFDBBB;border-radius:10px;overflow:hidden">
 
-            </td>
-          </tr>
+<!-- HEADER -->
+<tr>
+<td style="background:#664930;color:white;padding:20px;text-align:center">
+<h2 style="margin:0">🎓 Student Portal</h2>
+<p style="margin:5px 0 0 0;font-size:14px">Password Reset OTP</p>
+</td>
+</tr>
 
-          <!-- ⚠️ SECURITY ALERT -->
-          <tr>
-            <td style="padding:0 40px 50px">
-              <div style="background:linear-gradient(135deg,#fef7f6,#fde8e3);border:2px solid #fed7d7;border-radius:20px;padding:35px;margin:0;text-align:center;position:relative;overflow:hidden">
-                <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 35px rgba(239,68,68,0.3)">
-                  <span style="font-size:32px">⚠️</span>
-                </div>
-                <h3 style="margin:0 0 12px 0;color:#dc2626;font-size:20px;font-weight:700">Didn't request password reset?</h3>
-                <p style="margin:0;color:#991b1b;font-size:16px;line-height:1.6">
-                  No worries! Your account is safe. This request will 
-                  <strong>automatically expire</strong> in 5 minutes.
-                </p>
-              </div>
-            </td>
-          </tr>
+<!-- CONTENT -->
+<tr>
+<td style="padding:30px;text-align:center">
 
-          <!-- ✨ PREMIUM FOOTER -->
-          <tr>
-            <td style="background:linear-gradient(135deg,#664930,#997E67);border-top:1px solid rgba(255,255,255,0.1);padding:45px 40px;text-align:center">
-              
-              <!-- Support section -->
-              <div style="margin-bottom:30px">
-                <p style="margin:0 0 25px 0;color:#94a3b8;font-size:16px;font-weight:500">Need help? We're here 24/7</p>
-                <div style="display:flex;justify-content:center;align-items:center;gap:35px;flex-wrap:wrap">
-                  <div style="text-align:center">
-                    <div style="width:56px;height:56px;background:linear-gradient(135deg,#3b82f6,#60a5fa);border-radius:16px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(59,130,246,0.3)">
-                      <span style="font-size:22px">📧</span>
-                    </div>
-                    <p style="margin:0;color:white;font-size:15px;font-weight:600">support@studentportal.in</p>
-                  </div>
-                  <div style="text-align:center">
-                    <div style="width:56px;height:56px;background:linear-gradient(135deg,#997E67,#CCBEB1);border-radius:16px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(153,126,103,0.3)">
-                      <span style="font-size:22px">📞</span>
-                    </div>
-                    <p style="margin:0;color:white;font-size:15px;font-weight:600">+91 93284 07114</p>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Copyright -->
-              <div style="padding:20px 0;border-top:1px solid rgba(255,255,255,0.1)">
-                <p style="margin:0;color:#64748b;font-size:14px;letter-spacing:0.5px">
-                  © 2026 <span style="color:#3b82f6;font-weight:600">Student Portal</span>. All rights reserved. | 
-                  <a href="#" style="color:#94a3b8;text-decoration:none;font-weight:500">Privacy Policy</a> | 
-                  <a href="#" style="color:#94a3b8;text-decoration:none;font-weight:500">Terms of Service</a>
-                </p>
-              </div>
-            </td>
-          </tr>
-        </table>
-        
-      </td>
-    </tr>
-  </table>
+<p style="color:#664930;font-size:16px;margin-bottom:20px">
+Use the OTP below to reset your password.
+</p>
 
-  <style>
-    @keyframes particles {
-      0% { transform: translateY(0px) rotate(0deg); }
-      100% { transform: translateY(-20px) rotate(180deg); }
-    }
-    @keyframes glow {
-      0% { opacity: 0.7; transform: rotate(0deg); }
-      100% { opacity: 1; transform: rotate(180deg); }
-    }
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-  
+<!-- OTP BOX -->
+<div style="
+font-size:34px;
+font-weight:bold;
+letter-spacing:6px;
+background:#997E67;
+color:white;
+padding:15px 25px;
+display:inline-block;
+border-radius:8px;
+margin-bottom:20px;
+">
+${otp}
+</div>
+
+<p style="color:#664930;font-size:14px">
+This OTP is valid for <b>5 minutes only</b>.
+</p>
+
+</td>
+</tr>
+
+<!-- SUPPORT TEAM -->
+<tr>
+<td style="background:#664930;color:white;text-align:center;padding:20px;font-size:14px">
+
+<b>Support Team</b><br><br>
+
+Name: Meet Patel <br>
+Email: patelmeetbhai6333@gmail.com <br>
+Contact: +91 9328407114
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
 </body>
 </html>
-  `,
+`
 });
 
 

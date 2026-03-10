@@ -22,7 +22,7 @@ const facultySchema = new mongoose.Schema(
     course: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
-      required: true,
+      required: false,
     },
     password: {
       type: String,

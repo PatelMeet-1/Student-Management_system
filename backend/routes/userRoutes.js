@@ -10,6 +10,8 @@ router.put("/:id", upload.single("photo"), controller.updateUser); // Update use
 router.delete("/:id", controller.deleteUser); // Delete user
 
 // LOGIN + PASSWORD
+// Bulk add students
+router.post("/bulk", controller.createUsersBulk); // New bulk route
 router.post("/login", controller.loginUser);
 router.put("/password", controller.updatePassword);
 

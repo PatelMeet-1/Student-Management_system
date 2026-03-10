@@ -9,6 +9,7 @@ router.post("/reset-password-otp", facultyController.verifyOTPAndResetPassword);
 
 // Admin routes (protected in future)
 router.post("/", facultyController.createFaculty);
+router.post("/bulk", facultyController.createFacultiesBulk);
 router.get("/", facultyController.getFaculties);
 router.put("/:id", facultyController.updateFaculty);
 router.delete("/:id", facultyController.deleteFaculty);
