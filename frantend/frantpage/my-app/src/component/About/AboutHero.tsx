@@ -3,10 +3,10 @@ import React from "react";
 const PageHeader = ({ title = "About Us", subtitle = "Learn more about our Student Management System" }) => {
   return (
     <section 
-      className="py-5 text-center"  // ✅ py-4 se py-5 kiya (thoda height badhaya)
+      className="py-5 text-center"
       style={{ 
-        backgroundColor: "#19747E",
-        color: "white",
+        backgroundColor: "#A9D6E5",  // background light blue
+        color: "#19747E",            // ✅ text color changed
         position: "relative",
         overflow: "hidden"
       }}
@@ -27,41 +27,41 @@ const PageHeader = ({ title = "About Us", subtitle = "Learn more about our Stude
       
       <div className="container position-relative">
         <h1 
-          className="fw-bold mb-4"  // ✅ mb-3 se mb-4 kiya
+          className="fw-bold mb-4"
           style={{ 
-            fontSize: "3.5rem",  // ✅ 2.8rem se 3.5rem (BADA TEXT)
-            color: "white",
-            textShadow: "0 3px 12px rgba(0,0,0,0.4)",  // ✅ Shadow bhi thoda strong
-            marginBottom: "1.5rem",  // ✅ Extra spacing
-            lineHeight: 1.1  // ✅ Better line height
+            fontSize: "3.5rem",
+            color: "#19747E",           // ✅ title color
+            textShadow: "0 3px 12px rgba(0,0,0,0.2)", // optional: thoda subtle shadow
+            marginBottom: "1.5rem",
+            lineHeight: 1.1
           }}
         >
           {title}
         </h1>
         
         <p 
-          className="lead mb-0 display-6"  // ✅ display-6 class add kiya
+          className="lead mb-0 display-6"
           style={{ 
-            fontSize: "1.6rem",  // ✅ 1.3rem se 1.6rem (BADA TEXT)
-            color: "rgba(255,255,255,0.98)",  // ✅ Thoda brighter
+            fontSize: "1.6rem",
+            color: "#19747E",           // ✅ subtitle color
             maxWidth: "700px",
-            margin: "0 auto 2rem",  // ✅ Extra bottom spacing
+            margin: "0 auto 2rem",
             fontWeight: "400",
-            letterSpacing: "-0.02em"  // ✅ Professional touch
+            letterSpacing: "-0.02em"
           }}
         >
           {subtitle}
         </p>
         
-        {/* Decorative Line - Thoda bada */}
+        {/* Decorative Line */}
         <div 
           className="mt-4 mx-auto"
           style={{
-            width: "120px",  // ✅ 80px se 120px
-            height: "6px",   // ✅ 4px se 6px
+            width: "120px",
+            height: "6px",
             backgroundColor: "#19747E",
             borderRadius: "3px",
-            boxShadow: "0 4px 12px rgba(25,116,126,0.5)"  // ✅ Stronger shadow
+            boxShadow: "0 4px 12px rgba(25,116,126,0.5)"
           }}
         />
       </div>

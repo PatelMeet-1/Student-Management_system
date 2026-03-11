@@ -1,259 +1,175 @@
 import React from "react";
+import dashboardImage from './OIP (1).jpg';
 
 const AboutSystemSection: React.FC = () => {
   return (
-    <section className="py-5" style={{ backgroundColor: "#E2E2E2" }}>
-      <div className="container">
-        <div className="row align-items-center g-5">
+    <section className="py-3 py-md-4 py-lg-5" style={{ backgroundColor: "#E2E2E2" }}>
+      <div className="container px-2 px-md-3">
+        <div className="row align-items-center g-3 g-md-4 g-lg-5">
           
-          {/* Left - Image (FIXED) */}
-          <div className="col-lg-6 col-md-12">
+          {/* Left - Local Image (FULLY RESPONSIVE) */}
+          <div className="col-12 col-lg-6 order-2 order-lg-1">
             <div 
               style={{
-                height: "450px",
-                background: "linear-gradient(135deg, #D1E8E2 0%, white 100%)",
-                borderRadius: "25px",
-                boxShadow: "0 25px 50px rgba(25,116,126,0.15)",
-                overflow: "visible",  // ✅ KEY FIX: hidden se visible kiya
+                width: "100%",
+                height: "clamp(280px, 40vw, 450px)",
                 position: "relative",
-                border: "1px solid rgba(25,116,126,0.1)"
+                borderRadius: "20px",
+                boxShadow: "0 20px 40px rgba(25,116,126,0.15)",
+                overflow: "hidden",
+                border: "1px solid rgba(25,116,126,0.1)",
+                marginBottom: "1.5rem"
               }}
             >
-              {/* Mock Dashboard - POSITION FIXED */}
-              <div 
+              {/* YOUR LOCAL IMAGE */}
+              <img 
+                src={dashboardImage}
+                alt="Admin Dashboard"
                 style={{
-                  position: "absolute",
-                  top: "25%",      // ✅ Fixed top position
-                  left: "10%",     // ✅ Fixed left position (right: -10% remove)
-                  width: "80%",
-                  height: "55%",
-                  background: `linear-gradient(45deg, 
-                    rgba(25,116,126,0.2) 0%, 
-                    rgba(25,116,126,0.1) 50%, 
-                    rgba(25,116,126,0.15) 100%)`,
-                  borderRadius: "20px",
-                  boxShadow: "0 20px 40px rgba(25,116,126,0.25), inset 0 0 40px rgba(255,255,255,0.7)",
-                  border: "2px solid rgba(255,255,255,0.9)"
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover"
                 }}
               />
               
-              {/* Multiple Dashboard Elements */}
-              <div 
-                style={{
-                  position: "absolute",
-                  top: "35%",
-                  right: "15%",
-                  width: "35%",
-                  height: "20%",
-                  background: `linear-gradient(135deg, 
-                    rgba(25,116,126,0.15) 0%, 
-                    rgba(255,255,255,0.3) 100%)`,
-                  borderRadius: "12px",
-                  boxShadow: "0 10px 25px rgba(25,116,126,0.2)"
-                }}
-              />
-              
-              <div 
-                style={{
-                  position: "absolute",
-                  bottom: "25%",
-                  left: "20%",
-                  width: "45%",
-                  height: "15%",
-                  background: "rgba(255,255,255,0.4)",
-                  borderRadius: "10px",
-                  boxShadow: "0 8px 20px rgba(25,116,126,0.15)"
-                }}
-              />
-
               {/* Dashboard Label */}
               <div 
-                className="position-absolute bottom-0 start-0 p-4"
-                style={{ zIndex: 20 }}
+                className="position-absolute bottom-0 start-0 p-2 p-md-3"
+                style={{ 
+                  backgroundColor: "rgba(25,116,126,0.95)",
+                  color: "white",
+                  width: "100%",
+                  backdropFilter: "blur(10px)"
+                }}
               >
-                <h4 style={{ 
-                  color: "#19747E", 
-                  fontWeight: "bold",
-                  fontSize: "1.3rem",
-                  marginBottom: "0.25rem"
-                }}>
+                <h6 
+                  className="fw-bold mb-1"
+                  style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)" }}
+                >
                   📊 Admin Dashboard
-                </h4>
-                <p style={{ 
-                  color: "#19747E", 
-                  fontSize: "0.95rem",
-                  margin: 0,
-                  fontWeight: "500"
-                }}>
+                </h6>
+                <p className="mb-0 fw-medium small" style={{ fontSize: "clamp(0.75rem, 2vw, 0.85rem)" }}>
                   Real-time analytics & insights
                 </p>
               </div>
+
+              {/* Online Status Dot */}
+              <div 
+                style={{
+                  position: "absolute",
+                  top: "12px",
+                  right: "12px",
+                  width: "clamp(14px, 2vw, 18px)",
+                  height: "clamp(14px, 2vw, 18px)",
+                  backgroundColor: "#19747E",
+                  borderRadius: "50%",
+                  border: "2px solid white",
+                  boxShadow: "0 3px 10px rgba(25,116,126,0.4)"
+                }}
+              />
             </div>
           </div>
 
-          {/* Right - Text */}
-          <div className="col-lg-6 col-md-12">
-            <div>
-              <h2 
-                className="fw-bold mb-4"
+          {/* Right - Text (MOBILE FIRST) */}
+          <div className="col-12 col-lg-6 order-1 order-lg-2 text-center text-lg-start mb-4 mb-lg-0">
+            <h2 
+              className="fw-bold mb-3 mb-md-4"
+              style={{ 
+                color: "#19747E",
+                fontSize: "clamp(1.8rem, 5vw, 2.8rem)",
+                lineHeight: 1.2,
+                marginBottom: "1rem !important"
+              }}
+            >
+              About Our 
+              <span style={{ color: "#19747E", fontWeight: "900" }}>Student</span>
+              <br className="d-lg-none" />
+              Management System
+            </h2>
+
+            <p 
+              className="lead mb-4 px-2 px-md-0"
+              style={{ 
+                color: "#19747E",
+                fontSize: "clamp(1rem, 3vw, 1.2rem)",
+                lineHeight: 1.7,
+                marginBottom: "1.5rem !important"
+              }}
+            >
+              Complete academic management solution jo aapke institution ko 
+              next level pe le jayega.
+            </p>
+
+            {/* Features List - MOBILE STACKED */}
+            <div className="row g-3 mb-4">
+              {[
+                { icon: "👤", title: "Student Data Management", desc: "Complete student profiles, enrollment, aur records" },
+                { icon: "📚", title: "Course Management", desc: "Timetable, assignments, aur course allocation" },
+                { icon: "🏢", title: "Department Management", desc: "Faculty allocation aur department-wise reports" },
+                { icon: "📊", title: "Result & Attendance", desc: "Real-time marks entry aur attendance tracking" }
+              ].map((feature, index) => (
+                <div key={index} className="col-12 col-md-6 px-2">
+                  <div className="d-flex align-items-start py-2">
+                    <div 
+                      style={{
+                        width: "clamp(38px, 8vw, 48px)",
+                        height: "clamp(38px, 8vw, 48px)",
+                        backgroundColor: "#19747E",
+                        borderRadius: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginRight: "10px",
+                        flexShrink: 0,
+                        boxShadow: "0 4px 12px rgba(25,116,126,0.2)"
+                      }}
+                    >
+                      <span style={{ color: "white", fontSize: "clamp(1rem, 4vw, 1.3rem)" }}>
+                        {feature.icon}
+                      </span>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h6 
+                        className="fw-bold mb-1" 
+                        style={{ 
+                          color: "#19747E",
+                          fontSize: "clamp(0.95rem, 2.8vw, 1.15rem)",
+                          marginBottom: "0.25rem !important"
+                        }}
+                      >
+                        {feature.title}
+                      </h6>
+                      <p 
+                        className="mb-0 small lh-sm" 
+                        style={{ 
+                          color: "#19747E", 
+                          fontSize: "clamp(0.8rem, 2.3vw, 0.9rem)"
+                        }}
+                      >
+                        {feature.desc}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <div className="text-center">
+              <button
+                className="btn fw-bold px-4 px-md-5 py-2 py-md-3"
                 style={{ 
-                  color: "#19747E",
-                  fontSize: "2.8rem",
-                  lineHeight: 1.2
+                  backgroundColor: "#19747E",
+                  color: "white",
+                  borderRadius: "25px",
+                  border: "none",
+                  fontSize: "clamp(0.95rem, 2.5vw, 1.05rem)",
+                  boxShadow: "0 8px 25px rgba(25,116,126,0.3)",
+                  padding: "0.75rem 1.75rem"
                 }}
               >
-                About Our 
-                <span style={{ color: "#19747E", fontWeight: "900" }}>Student</span> 
-                <br />
-                Management System
-              </h2>
-
-              <p 
-                className="lead mb-5"
-                style={{ 
-                  color: "#19747E",
-                  fontSize: "1.2rem",
-                  lineHeight: 1.7
-                }}
-              >
-                Complete academic management solution jo aapke institution ko 
-                next level pe le jayega.
-              </p>
-
-              {/* Features List */}
-              <div className="row g-4 mb-5">
-                <div className="col-md-6">
-                  <div className="d-flex align-items-start mb-3">
-                    <div 
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        backgroundColor: "#19747E",
-                        borderRadius: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginRight: "15px",
-                        flexShrink: 0,
-                        boxShadow: "0 5px 15px rgba(25,116,126,0.2)"
-                      }}
-                    >
-                      <span style={{ color: "white", fontSize: "1.4rem" }}>👤</span>
-                    </div>
-                    <div>
-                      <h5 className="fw-bold mb-1" style={{ color: "#19747E" }}>
-                        Student Data Management
-                      </h5>
-                      <p className="mb-0" style={{ color: "#19747E", fontSize: "0.95rem" }}>
-                        Complete student profiles, enrollment, aur records
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-md-6">
-                  <div className="d-flex align-items-start mb-3">
-                    <div 
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        backgroundColor: "#19747E",
-                        borderRadius: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginRight: "15px",
-                        flexShrink: 0,
-                        boxShadow: "0 5px 15px rgba(25,116,126,0.2)"
-                      }}
-                    >
-                      <span style={{ color: "white", fontSize: "1.4rem" }}>📚</span>
-                    </div>
-                    <div>
-                      <h5 className="fw-bold mb-1" style={{ color: "#19747E" }}>
-                        Course Management
-                      </h5>
-                      <p className="mb-0" style={{ color: "#19747E", fontSize: "0.95rem" }}>
-                        Timetable, assignments, aur course allocation
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-md-6">
-                  <div className="d-flex align-items-start mb-3">
-                    <div 
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        backgroundColor: "#19747E",
-                        borderRadius: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginRight: "15px",
-                        flexShrink: 0,
-                        boxShadow: "0 5px 15px rgba(25,116,126,0.2)"
-                      }}
-                    >
-                      <span style={{ color: "white", fontSize: "1.4rem" }}>🏢</span>
-                    </div>
-                    <div>
-                      <h5 className="fw-bold mb-1" style={{ color: "#19747E" }}>
-                        Department Management
-                      </h5>
-                      <p className="mb-0" style={{ color: "#19747E", fontSize: "0.95rem" }}>
-                        Faculty allocation aur department-wise reports
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-md-6">
-                  <div className="d-flex align-items-start">
-                    <div 
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        backgroundColor: "#19747E",
-                        borderRadius: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginRight: "15px",
-                        flexShrink: 0,
-                        boxShadow: "0 5px 15px rgba(25,116,126,0.2)"
-                      }}
-                    >
-                      <span style={{ color: "white", fontSize: "1.4rem" }}>📊</span>
-                    </div>
-                    <div>
-                      <h5 className="fw-bold mb-1" style={{ color: "#19747E" }}>
-                        Result & Attendance
-                      </h5>
-                      <p className="mb-0" style={{ color: "#19747E", fontSize: "0.95rem" }}>
-                        Real-time marks entry aur attendance tracking
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <button
-                  className="btn fw-bold px-5 py-3"
-                  style={{ 
-                    backgroundColor: "#19747E",
-                    color: "white",
-                    borderRadius: "30px",
-                    border: "none",
-                    fontSize: "1.1rem",
-                    boxShadow: "0 10px 30px rgba(25,116,126,0.3)"
-                  }}
-                >
-                  Learn More →
-                </button>
-              </div>
+                Learn More →
+              </button>
             </div>
           </div>
         </div>

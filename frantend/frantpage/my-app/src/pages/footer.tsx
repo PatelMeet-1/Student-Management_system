@@ -52,9 +52,9 @@ function Footer() {
           <div className="col-md-4 mb-4">
             <h5 className="fw-bold">Contact</h5>
 
-            <p className="mb-1">📧 info@studentms.com</p>
-            <p className="mb-1">📞 +91 XXXXX XXXXX</p>
-            <p className="mb-1">📍 India</p>
+            <p className="mb-1">📧 patelmeetbhai6333@gmail.com</p>
+            <p className="mb-1">📞 +91 9328407114</p>
+            <p className="mb-1">📍Surendranagar,Gujrat, India</p>
 
             {/* Social Icons */}
             <div className="mt-3">

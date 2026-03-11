@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";  // BrowserRouter NHI import k
 import Home from "./pages/Home";
 import Navbar from "./pages/navbar";
 import About from "./pages/About";
+import Courses from "./pages/Courses";
 
 function App() {
   return (
@@ -15,6 +16,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/About" element={<About />} />
+          <Route path="/Courses" element={<Courses />} />
+
 
           
         </Routes>

@@ -39,7 +39,7 @@ const whyChooseData = {
 
 const WhyChooseSection: React.FC = () => {
   return (
-    <section className="py-5" style={{ backgroundColor: "#F8F9FA" }}>
+    <section className="py-5" style={{ backgroundColor: "#E2E2E2" }}>
       <div className="container">
         <div className="text-center mb-5">
           <h2 
@@ -147,7 +147,7 @@ const WhyChooseSection: React.FC = () => {
         </div>
 
         {/* Stats Row */}
-        <div className="row mt-5 pt-5" style={{ borderTop: "1px solid rgba(25,116,126,0.1)" }}>
+        <div className="row mt-5 pt-5" style={{ borderTop: "1px solid rgba(25,116,126,0.1)", backgroundColor:"#A9D6E5" }}>
           <div className="col-md-3 text-center mb-4">
             <h3 style={{ color: "#19747E", fontSize: "2.5rem", fontWeight: "bold" }}>10K+</h3>
             <p style={{ color: "#19747E", fontSize: "1rem" }}>Happy Institutions</p>
