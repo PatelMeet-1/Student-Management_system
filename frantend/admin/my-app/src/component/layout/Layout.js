@@ -154,21 +154,21 @@ export default function Layout({ active, setActive, children }) {
         ))}
 
         {/* ================= LOGOUT ================= */}
-        <div className="mt-auto pt-3">
-          <button
-            className="btn btn-danger w-100 fw-bold"
-            style={{
-              height: "45px",
-              borderRadius: "8px",
-              fontSize: isMobile ? "13px" : "14px",
-              transition: "all 0.3s ease",
-            }}
-            onClick={handleLogout}
-          >
-            <FaSignOutAlt className="me-2" />
-            <span>Logout</span>
-          </button>
-        </div>
+       <div>
+  <button
+    className="btn btn-danger w-100 fw-bold mt-2"
+    style={{
+      height: "45px",
+      borderRadius: "8px",
+      fontSize: isMobile ? "13px" : "14px",
+      transition: "all 0.3s ease",
+    }}
+    onClick={handleLogout}
+  >
+    <FaSignOutAlt className="me-2" />
+    <span>Logout</span>
+  </button>
+</div>
       </div>
 
       {/* ================= CONTENT AREA ================= */}
