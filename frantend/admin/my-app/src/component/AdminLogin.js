@@ -117,8 +117,12 @@ const handleLogin = async (e) => {
       {/* ===== LOGIN CARD ===== */}
       <div
         className="card shadow-lg p-4"
-        style={{ width: 380, borderRadius: 15, border: "none" }}
-      >
+style={{ 
+  width: "100%", 
+  maxWidth: 380, 
+  borderRadius: 15, 
+  border: "none" 
+}}      >
         <div className="text-center mb-4">
           <div
             style={{
