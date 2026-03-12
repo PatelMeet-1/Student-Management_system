@@ -9,6 +9,7 @@ const Hero: React.FC = () => {
         minHeight: "80vh" 
       }}
     >
+      
       <div className="container">
         <div className="row align-items-center g-4 g-md-0">
           {/* Left Side Text */}

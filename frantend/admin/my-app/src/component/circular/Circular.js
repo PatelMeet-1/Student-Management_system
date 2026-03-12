@@ -8,7 +8,7 @@ import PdfList from "../circular/PdfList";
 import Loader from "../loader";
 
 // 🔥 FIXED API_URL for Render.com
-const BASE_URL = process.env.REACT_APP_API_URL.replace('/api', '') || 'https://student-management-system-th5w.onrender.com';
+const BASE_URL = process.env.REACT_APP_API_URL.replace('/api', '') || 'https://student-management-systemnode.onrender.com';
 const API_URL = `${BASE_URL}/api/circular`;
 
 console.log("🚀 API_URL:", API_URL);

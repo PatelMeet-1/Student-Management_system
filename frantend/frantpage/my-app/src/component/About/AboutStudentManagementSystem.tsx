@@ -32,40 +32,11 @@ const AboutSystemSection: React.FC = () => {
                 }}
               />
               
-              {/* Dashboard Label */}
-              <div 
-                className="position-absolute bottom-0 start-0 p-2 p-md-3"
-                style={{ 
-                  backgroundColor: "rgba(25,116,126,0.95)",
-                  color: "white",
-                  width: "100%",
-                  backdropFilter: "blur(10px)"
-                }}
-              >
-                <h6 
-                  className="fw-bold mb-1"
-                  style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)" }}
-                >
-                  📊 Admin Dashboard
-                </h6>
-                <p className="mb-0 fw-medium small" style={{ fontSize: "clamp(0.75rem, 2vw, 0.85rem)" }}>
-                  Real-time analytics & insights
-                </p>
-              </div>
+           
 
               {/* Online Status Dot */}
               <div 
-                style={{
-                  position: "absolute",
-                  top: "12px",
-                  right: "12px",
-                  width: "clamp(14px, 2vw, 18px)",
-                  height: "clamp(14px, 2vw, 18px)",
-                  backgroundColor: "#19747E",
-                  borderRadius: "50%",
-                  border: "2px solid white",
-                  boxShadow: "0 3px 10px rgba(25,116,126,0.4)"
-                }}
+              
               />
             </div>
           </div>

@@ -55,7 +55,7 @@ export default function StudentLoginForm({ setLoggedUser }) {
     setSuccess("");
     setLoading(true);
     try {
-      await axios.post(`${API}/users/send-otp`, { email: fpEmail }); // 🔥 updated
+      await axios.post(`${API}/users/send-otp`, { email: fpEmail }); 
       setForgotStep("otp");
       setSuccess("📧 OTP sent to your email");
     } catch (err) {
@@ -73,7 +73,7 @@ export default function StudentLoginForm({ setLoggedUser }) {
 
     setLoading(true);
     try {
-      await axios.post(`${API}/users/reset-password`, { // 🔥 updated
+      await axios.post(`${API}/users/reset-password`, { 
         email: fpEmail,
         otp,
         newPassword: newPass,
