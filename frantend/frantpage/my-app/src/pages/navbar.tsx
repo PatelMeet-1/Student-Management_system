@@ -109,7 +109,7 @@ function Navbar() {
 
             <li className="nav-item ms-3">
               <Link 
-                to="/login"
+                to="https://student-management-system-1frantuser.onrender.com"
                 className="btn px-4 py-2 fw-bold"
                 style={{ 
                   backgroundColor: "rgba(255,255,255,0.2)",
