@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+
 import AOS from "aos";
 import "aos/dist/aos.css";
 
@@ -39,16 +40,20 @@ const Hero = () => {
             </p>
 
             <div className="d-flex flex-column flex-md-row gap-3">
-              <button
-                className="btn btn-primary px-4 py-2 flex-fill flex-md-fill"
-                style={{
-                  backgroundColor: "#19747E", // Dark Cyan
-                  borderColor: "#19747E",
-                  color: "white"
-                }}
-              >
-                Login
-              </button>
+          
+
+<a href="https://student-management-system-1frantuser.onrender.com">
+  <button
+    className="btn btn-primary px-4 py-2 flex-fill flex-md-fill"
+    style={{
+      backgroundColor: "#19747E",
+      borderColor: "#19747E",
+      color: "white"
+    }}
+  >
+    Login
+  </button>
+</a>
 
               <button
                 className="btn btn-outline-primary px-4 py-2 flex-fill flex-md-fill"

@@ -1,11 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function Footer() {
   return (
     <footer
       className="text-white"
-      style={{ backgroundColor: "#19747E" }} // Dark Cyan
+      style={{ backgroundColor: "#19747E" }}
     >
       <div className="container py-5">
         <div className="row text-center text-md-start">
@@ -24,27 +24,55 @@ function Footer() {
             <h5 className="fw-bold">Quick Links</h5>
 
             <p className="mb-1">
-              <Link to="/" className="text-white text-decoration-none">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `text-decoration-none ${
+                    isActive ? "text-warning fw-bold" : "text-white"
+                  }`
+                }
+              >
                 Home
-              </Link>
+              </NavLink>
             </p>
 
             <p className="mb-1">
-              <Link to="/about" className="text-white text-decoration-none">
+              <NavLink
+                to="/about"
+                className={({ isActive }) =>
+                  `text-decoration-none ${
+                    isActive ? "text-warning fw-bold" : "text-white"
+                  }`
+                }
+              >
                 About
-              </Link>
+              </NavLink>
             </p>
 
             <p className="mb-1">
-              <Link to="/courses" className="text-white text-decoration-none">
+              <NavLink
+                to="/courses"
+                className={({ isActive }) =>
+                  `text-decoration-none ${
+                    isActive ? "text-warning fw-bold" : "text-white"
+                  }`
+                }
+              >
                 Courses
-              </Link>
+              </NavLink>
             </p>
 
             <p className="mb-1">
-              <Link to="/contact" className="text-white text-decoration-none">
+              <NavLink
+                to="/contactus"
+                className={({ isActive }) =>
+                  `text-decoration-none ${
+                    isActive ? "text-warning fw-bold" : "text-white"
+                  }`
+                }
+              >
                 Contact
-              </Link>
+              </NavLink>
             </p>
           </div>
 
@@ -54,45 +82,47 @@ function Footer() {
 
             <p className="mb-1">📧 patelmeetbhai6333@gmail.com</p>
             <p className="mb-1">📞 +91 9328407114</p>
-            <p className="mb-1">📍Surendranagar,Gujrat, India</p>
+            <p className="mb-1">📍Surendranagar, Gujarat, India</p>
 
             {/* Social Icons */}
             <div className="mt-3">
+
               <i
                 className="bi bi-facebook me-3"
-                style={{ 
-                  fontSize: "20px", 
+                style={{
+                  fontSize: "20px",
                   cursor: "pointer",
-                  color: "#A9D6E5" // Light Blue
+                  color: "#A9D6E5"
                 }}
               ></i>
 
               <i
                 className="bi bi-instagram me-3"
-                style={{ 
-                  fontSize: "20px", 
+                style={{
+                  fontSize: "20px",
                   cursor: "pointer",
-                  color: "#A9D6E5" // Light Blue
+                  color: "#A9D6E5"
                 }}
               ></i>
 
               <i
                 className="bi bi-linkedin me-3"
-                style={{ 
-                  fontSize: "20px", 
+                style={{
+                  fontSize: "20px",
                   cursor: "pointer",
-                  color: "#A9D6E5" // Light Blue
+                  color: "#A9D6E5"
                 }}
               ></i>
 
               <i
                 className="bi bi-twitter"
-                style={{ 
-                  fontSize: "20px", 
+                style={{
+                  fontSize: "20px",
                   cursor: "pointer",
-                  color: "#A9D6E5" // Light Blue
+                  color: "#A9D6E5"
                 }}
               ></i>
+
             </div>
           </div>
 
@@ -102,9 +132,9 @@ function Footer() {
       {/* Bottom Footer */}
       <div
         className="text-center py-3"
-        style={{ 
-          backgroundColor: "#D1E8E2", // Soft Mint Green
-          color: "#19747E" // Dark Cyan text
+        style={{
+          backgroundColor: "#D1E8E2",
+          color: "#19747E"
         }}
       >
         © 2026 Student Management System | All Rights Reserved
