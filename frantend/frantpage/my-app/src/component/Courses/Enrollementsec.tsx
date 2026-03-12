@@ -1,5 +1,5 @@
 import React from "react";
-
+import CountUp from "react-countup";
 const EnrollmentCTA: React.FC = () => {
   return (
     <section 
@@ -93,8 +93,12 @@ const EnrollmentCTA: React.FC = () => {
           boxShadow: "0 5px 15px rgba(0,0,0,0.1)"
         }}
       >
-        5000+
-      </div>
+<CountUp 
+  end={5000} 
+  duration={3} 
+  enableScrollSpy={true} 
+  scrollSpyOnce={false}
+/>+      </div>
       <div className="small fw-semibold mt-2" style={{ color: "#19747E" }}>
         Students Enrolled
       </div>
@@ -103,7 +107,7 @@ const EnrollmentCTA: React.FC = () => {
     {/* Courses */}
     <div className="col-12 col-sm-4 col-lg-2 ms-md-5">
       <div
-        className="fw-bold mx-auto"
+        className="fw-bold mx-auto ms-md-5"
         style={{
           fontSize: "clamp(1.6rem, 4.5vw, 2.3rem)",
           color: "#19747E", 
@@ -114,9 +118,13 @@ const EnrollmentCTA: React.FC = () => {
           boxShadow: "0 5px 15px rgba(0,0,0,0.1)"
         }}
       >
-        12
-      </div>
-      <div className="small fw-semibold mt-2" style={{ color: "#19747E" }}>
+<CountUp 
+  end={12} 
+  duration={2} 
+  enableScrollSpy={true} 
+  scrollSpyOnce={false}
+/>      </div>
+      <div className="small fw-semibold mt-2 ms-md-5" style={{ color: "#19747E" }}>
         Courses Offered
       </div>
     </div>
@@ -124,7 +132,7 @@ const EnrollmentCTA: React.FC = () => {
     {/* Placement */}
     <div className="col-12 col-sm-4 col-lg-2">
       <div
-        className="fw-bold mx-auto"
+        className="fw-bold mx-auto ms-md-5"
         style={{
           fontSize: "clamp(1.6rem, 4.5vw, 2.3rem)",
           color: "#19747E",
@@ -135,9 +143,14 @@ const EnrollmentCTA: React.FC = () => {
           boxShadow: "0 5px 15px rgba(0,0,0,0.1)"
         }}
       >
-        95%
-      </div>
-      <div className="small fw-semibold mt-2" style={{ color: "#19747E" }}>
+<CountUp 
+  end={95} 
+  duration={2} 
+  enableScrollSpy={true} 
+  scrollSpyOnce={false}
+/>%  
+ </div>
+      <div className="small fw-semibold mt-2 ms-md-5" style={{ color: "#19747E" }}>
         Placement Rate
       </div>
     </div>
@@ -149,7 +162,7 @@ const EnrollmentCTA: React.FC = () => {
             {/* CTA Buttons */}
             <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center flex-wrap">
               <a 
-                href="/login"
+                href="https://student-management-system-1frantuser.onrender.com"
                 className="btn btn-lg fw-bold px-4 px-md-5 py-3 rounded-pill shadow-lg flex-fill"
                 style={{
                   backgroundColor: "#19747E",

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 const coursesData = [
   {
     id: 1,
@@ -126,6 +127,14 @@ const coursesData = [
 
 
 const CourseHighlights: React.FC = () => {
+  useEffect(() => {
+  AOS.init({
+    duration: 1000,
+    once: false
+  });
+
+  AOS.refresh();
+}, []);
   const [showMore, setShowMore] = useState(false);
 
   const firstThreeCourses = coursesData.slice(0, 3);
@@ -137,6 +146,7 @@ const CourseHighlights: React.FC = () => {
       'B.Com': '💰', 'BA': '📚', 'MBA': '👔', 'MCA': '⚙️',
       'M.Tech': '🚀', 'M.Sc': '🧪', 'M.Com': '💼', 'MA': '✍️'
     };
+    
     return icons[title] || '📖';
   };
 
@@ -170,7 +180,7 @@ const CourseHighlights: React.FC = () => {
         </div>
 
         {/* First 3 Courses - Always Visible */}
-        <div className="row g-3 g-sm-4 g-md-5 mb-4 mb-sm-5">
+        <div className="row g-3 g-sm-4 g-md-5 mb-4 mb-sm-5" data-aos="zoom-in">
           {firstThreeCourses.map((course) => (
             <div key={course.id} className="col-12 col-sm-6 col-md-6 col-lg-4 px-1 px-sm-2">
               <CourseCard course={course} />

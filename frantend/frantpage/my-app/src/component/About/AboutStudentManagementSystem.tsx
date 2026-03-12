@@ -1,14 +1,25 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import dashboardImage from './OIP (1).jpg';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const AboutSystemSection: React.FC = () => {
+  useEffect(() => {
+  AOS.init({
+    duration: 1000,
+    once: false
+  });
+
+  AOS.refresh();
+}, []);
+
   return (
     <section className="py-3 py-md-4 py-lg-5" style={{ backgroundColor: "#E2E2E2" }}>
       <div className="container px-2 px-md-3">
         <div className="row align-items-center g-3 g-md-4 g-lg-5">
           
           {/* Left - Local Image (FULLY RESPONSIVE) */}
-          <div className="col-12 col-lg-6 order-2 order-lg-1">
+          <div className="col-12 col-lg-6 order-2 order-lg-1" data-aos="zoom-in">
             <div 
               style={{
                 width: "100%",
@@ -42,7 +53,7 @@ const AboutSystemSection: React.FC = () => {
           </div>
 
           {/* Right - Text (MOBILE FIRST) */}
-          <div className="col-12 col-lg-6 order-1 order-lg-2 text-center text-lg-start mb-4 mb-lg-0">
+          <div className="col-12 col-lg-6 order-1 order-lg-2 text-center text-lg-start mb-4 mb-lg-0"data-aos="zoom-in">
             <h2 
               className="fw-bold mb-3 mb-md-4"
               style={{ 

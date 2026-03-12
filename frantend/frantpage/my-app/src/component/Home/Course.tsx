@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";import AOS from "aos";
+import "aos/dist/aos.css";
+// import { useEffect } from "react";
+
+
 
 const coursesData = [
   {
@@ -275,6 +279,15 @@ const CourseModal: React.FC<{
 const Courses: React.FC = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: false
+    });
+
+    AOS.refresh();
+  }, []);
+
   const handleViewDetails = (course: Course) => {
     setSelectedCourse(course);
   };
@@ -296,7 +309,7 @@ const Courses: React.FC = () => {
             </p>
           </div>
 
-          <div className="row g-4">
+          <div className="row g-4" data-aos="zoom-in">
             {coursesData.map((course) => (
               <CourseCard 
                 key={course.id} 

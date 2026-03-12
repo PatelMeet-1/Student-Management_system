@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const StatisticsSection: React.FC = () => {
+    useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: false
+    });
+
+    AOS.refresh();
+  }, []);
   const [stats, setStats] = useState({
     students: 0,
     faculty: 0,
@@ -133,7 +143,7 @@ const StatisticsSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="row g-4 justify-content-center">
+        <div className="row g-4 justify-content-center" data-aos="zoom-in">
           {statsData.map((stat, index) => (
             <div key={index} className="col-lg-3 col-md-6 col-sm-6">
               <div 

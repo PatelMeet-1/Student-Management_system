@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 interface Feature {
   id: number;
@@ -54,8 +56,8 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ feature }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="col-md-4 col-sm-6">
-      <div 
+<div className="col-md-4 col-sm-6" data-aos="fade-up">
+        <div 
         className="p-4 shadow rounded h-100" 
         style={{ 
           backgroundColor: "#D1E8E2",
@@ -93,8 +95,16 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ feature }) => {
 };
 
 const Features: React.FC = () => {
+ useEffect(() => {
+  AOS.init({
+    duration: 1000,
+    once: false
+  });
+
+  AOS.refresh();
+}, []);
   return (
-    <section className="py-5" style={{ backgroundColor: "#A9D6E5" }}>
+    <section className="py-5" data-aos="" style={{ backgroundColor: "#A9D6E5" }}>
       <div className="container text-center">
         <h2 className="fw-bold mb-3" style={{ color: "#19747E" }}>
           System Features

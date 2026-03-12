@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const missionVisionData = {
   title: "Our Mission & Vision",
@@ -20,6 +23,14 @@ const missionVisionData = {
 };
 
 const MissionVisionSection: React.FC = () => {
+  useEffect(() => {
+  AOS.init({
+    duration: 1000,
+    once: false
+  });
+
+  AOS.refresh();
+}, []);
   return (
     <section className="py-4 py-md-5" style={{ backgroundColor: "#A9D6E5" }}>
       <div className="container px-3 px-md-4">
@@ -50,7 +61,7 @@ const MissionVisionSection: React.FC = () => {
         </div>
 
         {/* Cards - PERFECT MOBILE LAYOUT */}
-        <div className="row g-4 g-lg-5 justify-content-center">
+        <div className="row g-4 g-lg-5 justify-content-center" data-aos="zoom-in">
           {missionVisionData.cards.map((card, index) => (
             <div 
               key={index} 

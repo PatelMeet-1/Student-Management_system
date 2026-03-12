@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const whyChooseData = {
   title: "Why Choose Our System",
@@ -38,6 +40,14 @@ const whyChooseData = {
 };
 
 const WhyChooseSection: React.FC = () => {
+  useEffect(() => {
+  AOS.init({
+    duration: 1000,
+    once: false
+  });
+
+  AOS.refresh();
+}, []);
   return (
     <section className="py-5" style={{ backgroundColor: "#E2E2E2" }}>
       <div className="container">
@@ -64,7 +74,7 @@ const WhyChooseSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="row g-4">
+        <div className="row g-4" data-aos="zoom-in">
           {whyChooseData.features.map((feature, index) => (
             <div key={index} className="col-lg-4 col-md-6">
               <div 

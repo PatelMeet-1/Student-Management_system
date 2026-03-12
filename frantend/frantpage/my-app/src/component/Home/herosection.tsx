@@ -1,6 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
-const Hero: React.FC = () => {
+const Hero = () => {
+
+ useEffect(() => {
+  AOS.init({
+    duration: 1000,
+    once: false
+  });
+
+  AOS.refresh();
+}, []);
   return (
     <section
       className="py-4 py-md-5 "
@@ -13,17 +24,18 @@ const Hero: React.FC = () => {
       <div className="container">
         <div className="row align-items-center g-4 g-md-0">
           {/* Left Side Text */}
-          <div className="col-12 col-md-6">
+          
+          <div className="col-12 col-md-6" data-aos="fade-up">
             <h1
               className="fw-bold mb-4 display-4 display-md-3"
               style={{ color: "#19747E" }} // Dark Cyan
             >
-              Student Management System
+              Student Dashboard
+
             </h1>
 
             <p className="lead mb-4" style={{ fontSize: "1.1rem" }}>
-              A smart platform to manage students, departments and
-              courses efficiently in one place.
+             Login to access your complete academic dashboard -Result, timetable & exam schedule in one place.
             </p>
 
             <div className="d-flex flex-column flex-md-row gap-3">
@@ -52,7 +64,7 @@ const Hero: React.FC = () => {
           </div>
 
           {/* Right Side Image */}
-          <div className="col-12 col-md-6 text-center">
+          <div className="col-12 col-md-6 text-center" data-aos="fade-up">
             <img
               src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png"
               alt="students"

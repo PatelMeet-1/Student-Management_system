@@ -1,5 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import developerPhoto from './WhatsApp Image 2026-03-09 at 10.29.14 AM.jpeg'; 
+import AOS from "aos";
+import "aos/dist/aos.css";
+
 
 const projectData = {
   developer: {
@@ -26,6 +29,14 @@ const projectData = {
 };
 
 const DeveloperInfoSection: React.FC = () => {
+  useEffect(() => {
+  AOS.init({
+    duration: 1000,
+    once: false
+  });
+
+  AOS.refresh();
+}, []);
   return (
     <section className="py-3 py-md-4 py-lg-5" style={{ backgroundColor: "#A9D6E5" }}>
       <div className="container px-2 px-sm-3 px-md-4 px-lg-5">
@@ -50,7 +61,7 @@ const DeveloperInfoSection: React.FC = () => {
         <div className="row g-3 g-sm-4 g-md-5 align-items-lg-start">
           
           {/* Developer Profile - MOBILE PERFECT */}
-          <div className="col-12 col-lg-4 text-center mb-4 mb-lg-0">
+          <div className="col-12 col-lg-4 text-center mb-4 mb-lg-0" data-aos="zoom-in">
             <div 
               style={{
                 position: "relative",
@@ -138,7 +149,7 @@ const DeveloperInfoSection: React.FC = () => {
           </div>
 
           {/* Project Info - MOBILE PERFECT */}
-          <div className="col-12 col-lg-8">
+          <div className="col-12 col-lg-8" data-aos="zoom-in">
             <div 
               style={{ 
                 padding: "clamp(1.25rem, 3.5vw, 2.25rem)", 

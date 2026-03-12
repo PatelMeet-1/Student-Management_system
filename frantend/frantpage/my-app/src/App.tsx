@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Navbar from "./pages/navbar";
 import About from "./pages/About";
 import Courses from "./pages/Courses";
+import Contactus from "./pages/Contactus";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/About" element={<About />} />
           <Route path="/Courses" element={<Courses />} />
+          <Route path="/Contactus" element={<Contactus />} />
 
 
           

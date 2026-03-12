@@ -100,7 +100,7 @@ function Navbar() {
             <li className="nav-item">
               <Link 
                 className="nav-link text-white fw-semibold px-3 py-2 mx-1" 
-                to="/contact" 
+                to="/contactus" 
                 onClick={closeNavbar}
               >
                 Contact
