@@ -32,7 +32,7 @@ app.use("/api/faculty", require("./routes/facultyRoutes"));
 app.use("/api/results", require("./routes/resultRoutes"));
 app.use("/api/courses", require("./routes/courseRoutes"));       // ✅ Course + Semester
 app.use("/api/totalmarks", require("./routes/totalMarksRoutes")); // ✅ Semester-wise Total Marks
-
+app.use("/api/contact", require("./routes/gettouchRoutes"));
 // ---------------- GLOBAL ERROR HANDLER ----------------
 app.use((err, req, res, next) => {
   console.error(err.stack);

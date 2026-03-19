@@ -53,6 +53,7 @@ export default function Layout({ active, setActive, children }) {
     { key: "final", label: "Final Result", icon: <FaFileAlt /> },
     { key: "circular", label: "Circular", icon: <FaClock /> },
     { key: "timetable", label: "Timetable", icon: <FaClock /> },
+    { key: "Gettouchmsg", label: "Gettouchmsg", icon: <FaClock /> },
     // { key: "finalcertificate", label: "Final Certificate", icon: <FaFileAlt /> },
   ];
 

@@ -53,7 +53,7 @@ export default function Timetable() {
   }
 
   try {
-    setLoading(true); // 🔥 LOADER ON
+    setLoading(true); 
 
     if (editId) {
       await axios.put(`${API_URL}/${editId}`, formData, { headers });

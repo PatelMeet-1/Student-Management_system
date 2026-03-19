@@ -10,6 +10,7 @@ import InternalMarks from "../Internalmarks result/Internal";
 import PracticalMarks from "../practicalmarkResult/Practical";
 import Finalresult from "../Final result/Finalresult";
 import Totalmarks from "../SemesterWiseTotalMarks/SemesterWiseTotalMarks";
+import Gettouchmsg from "../gettouchmsg/gettouchmsg";
 
 
 export default function Main() {
@@ -27,6 +28,7 @@ export default function Main() {
       {active === "practical" && <PracticalMarks />}
       {active === "final" && <Finalresult />}
       {active === "marks" && <Totalmarks />}
+      {active === "Gettouchmsg" && <Gettouchmsg />}
    
     </Layout>
   );
