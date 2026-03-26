@@ -120,6 +120,7 @@ exports.loginFaculty = async (req, res) => {
         email: faculty.email,
         contact: faculty.contact,
         course: faculty.course,
+        department: faculty.department,
       },
     });
   } catch (err) {
@@ -306,8 +307,7 @@ exports.verifyOTPAndResetPassword = async (req, res) => {
 
 exports.createFaculty = async (req, res) => {
   try {
-    const { name, contact, email, course, password } = req.body;
-
+const { name, contact, email, course, department, password } = req.body;
     const cleanEmail = email?.toLowerCase().trim();
 
     if (!name || !contact || !cleanEmail || !password) {
@@ -327,13 +327,14 @@ exports.createFaculty = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const faculty = await Faculty.create({
-      name: name.trim(),
-      contact: contact.trim(),
-      email: cleanEmail,
-      course,
-      password: hashedPassword,
-    });
+   const faculty = await Faculty.create({
+  name: name.trim(),
+  contact: contact.trim(),
+  email: cleanEmail,
+  course,
+  department,
+  password: hashedPassword,
+});
 
     res.status(201).json({
       success: true,
@@ -351,17 +352,38 @@ exports.createFaculty = async (req, res) => {
 exports.getFaculties = async (req, res) => {
   try {
     const faculties = await Faculty.find()
-      .populate("course", "courseName")
-      .select("-password -otp -otpExpiry");
+      .populate('course', 'courseName departments')
+      .lean();
+
+    const facultiesWithDept = faculties.map(faculty => {
+      let departmentName = "N/A";
+      
+      if (faculty.course && faculty.course.departments) {
+        const dept = faculty.course.departments.find(d => 
+          d._id.toString() === faculty.department?.toString()
+        );
+        departmentName = dept ? dept.departmentName : "N/A";
+      }
+
+      return {
+        ...faculty,
+        department: {
+          _id: faculty.department,
+          departmentName: departmentName
+        }
+      };
+    });
 
     res.json({
       success: true,
-      data: faculties,
+      data: facultiesWithDept,
     });
   } catch (err) {
+    console.error("GET FACULTIES ERROR:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 
 // ================= UPDATE ========================
@@ -369,12 +391,13 @@ exports.getFaculties = async (req, res) => {
 exports.updateFaculty = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, contact, email, course, password } = req.body;
-
+const { name, contact, email, course, department, password } = req.body;
     const updateData = {};
     if (name) updateData.name = name.trim();
     if (contact) updateData.contact = contact.trim();
     if (course) updateData.course = course;
+    if (department) updateData.department = department; // ✅ ADD THIS
+
     if (email) updateData.email = email.toLowerCase().trim();
     if (password) updateData.password = await bcrypt.hash(password, 12);
 

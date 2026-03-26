@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const facultySchema = new mongoose.Schema(
   {
     name: {
@@ -24,6 +25,10 @@ const facultySchema = new mongoose.Schema(
       ref: "Course",
       required: false,
     },
+    department: {
+  type: mongoose.Schema.Types.ObjectId,
+  required: false,
+},
     password: {
       type: String,
       required: true,

@@ -260,11 +260,23 @@ export default function MarksManager({
           ? res.data
           : [];
 
-      // Faculty panel: sirf wahi course dikhao jis se faculty register hai
+      // Faculty panel: sirf wahi course & department dikhao jis se faculty register hai
       const facultyData = JSON.parse(localStorage.getItem("facultyData") || "null");
       const facultyCourseId = facultyData?.course?._id || facultyData?.course;
+      const facultyDeptId = facultyData?.department?._id || facultyData?.department;
+
       if (facultyCourseId) {
         data = data.filter((c) => String(c._id) === String(facultyCourseId));
+        
+        // Filter out departments inside that course
+        if (facultyDeptId) {
+          data = data.map(c => {
+            return {
+              ...c,
+              departments: c.departments ? c.departments.filter(d => String(d._id) === String(facultyDeptId)) : []
+            };
+          });
+        }
       }
       setCourses(data);
     } catch (err) {

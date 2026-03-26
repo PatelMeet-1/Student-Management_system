@@ -3,13 +3,18 @@ const Contact = require("../models/gettouch");
 // ---------------- POST ----------------
 const submitContactForm = async (req, res) => {
   try {
-    const { name, email, subject, message } = req.body;
-
-    if (!name || !email || !subject || !message) {
+const { name, email, contact, subject, message } = req.body;
+   if (!name || !email || !contact || !subject || !message) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const newMessage = new Contact({ name, email, subject, message });
+    const newMessage = new Contact({
+  name,
+  email,
+  contact,   // ✅ ADD THIS
+  subject,
+  message
+});
     await newMessage.save();
 
     return res.status(200).json({ message: "Message sent successfully" });
@@ -34,16 +39,24 @@ const getAllMessages = async (req, res) => {
 const deleteMessage = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // ✅ Check valid MongoDB ID
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+
     const message = await Contact.findById(id);
 
     if (!message) {
       return res.status(404).json({ message: "Message not found" });
     }
 
-    await message.remove();
+    //  FIXED DELETE
+    await Contact.findByIdAndDelete(id);
+
     return res.status(200).json({ message: "Message deleted successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("DELETE ERROR:", error); 
     return res.status(500).json({ message: "Server error, try again later" });
   }
 };
